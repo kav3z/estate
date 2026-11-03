@@ -61,39 +61,75 @@
         <a href="/matching" class="hover:text-charcoal transition">Smart Match</a>
         <a href="/neighbourhoods" class="hover:text-charcoal transition">Neighbourhood Intel</a>
         <a href="/reviews" class="hover:text-charcoal transition">Reviews</a>
-        <a href="/help" class="hover:text-charcoal transition">Help & FAQ</a>
+        <a href="/help" class="hover:text-charcoal transition">Help</a>
       </div>
 
       <!-- Right Action Pills -->
       <div class="flex items-center gap-2 shrink-0">
-        <!-- Multi-Property Cart Pill -->
-        <a href="/transactions/cart"
-           class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-neutral-300 hover:border-charcoal text-xs font-medium transition bg-white">
-          <svg class="w-4 h-4 text-charcoal" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-4h.01" />
-          </svg>
-          <span class="hidden sm:inline">Selection Tray</span>
-          <span class="bg-lime text-charcoal font-bold px-1.5 py-0.2 rounded-full text-[11px]">{{ cart_count }}</span>
-        </a>
+        {% if is_home_page %}
+          <!-- Home Page Navbar: Only Sign In and Register -->
+          <a href="/auth/login"
+             class="inline-flex items-center px-4 py-2 rounded-full border border-neutral-300 hover:border-charcoal text-xs font-semibold transition">
+            Sign In
+          </a>
+          <a href="/auth/register"
+             class="btn-lime px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold">
+            <span>Register</span>
+            <span aria-hidden="true">→</span>
+          </a>
+        {% elif is_dashboard_page %}
+          <!-- Dashboard Navbar: Selection Tray, Active Hub Badge, and Logout (No Sign In / Register) -->
+          <a href="/transactions/cart"
+             class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-neutral-300 hover:border-charcoal text-xs font-medium transition bg-white">
+            <svg class="w-4 h-4 text-charcoal" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-4h.01" />
+            </svg>
+            <span class="hidden sm:inline">Selection Tray</span>
+            <span class="bg-lime text-charcoal font-bold px-1.5 py-0.2 rounded-full text-[11px]">{{ cart_count }}</span>
+          </a>
 
-        <!-- Active Role Dashboard Button -->
-        <a href="/dashboard/{{ current_user.role }}"
-           class="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-neutral-300 hover:border-charcoal text-xs font-medium transition">
-          <span>{{ current_user.role | capitalize }} Hub</span>
-        </a>
+          <a href="/dashboard/{{ current_user.role }}"
+             class="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-alabaster border border-neutral-300 text-xs font-semibold text-charcoal">
+            <span>{{ current_user.role | capitalize }} Hub</span>
+          </a>
 
-        <!-- Sign In Pill -->
-        <a href="/auth/login"
-           class="hidden md:inline-flex items-center px-4 py-2 rounded-full border border-neutral-300 hover:border-charcoal text-xs font-semibold transition">
-          Sign In
-        </a>
+          <a href="/auth/logout"
+             class="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2 rounded-full bg-charcoal hover:bg-neutral-800 text-white text-xs sm:text-sm font-semibold transition">
+            <span>Logout</span>
+            <span aria-hidden="true">→</span>
+          </a>
+        {% else %}
+          <!-- Other Interior Pages -->
+          <a href="/transactions/cart"
+             class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-neutral-300 hover:border-charcoal text-xs font-medium transition bg-white">
+            <svg class="w-4 h-4 text-charcoal" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-4h.01" />
+            </svg>
+            <span class="hidden sm:inline">Selection Tray</span>
+            <span class="bg-lime text-charcoal font-bold px-1.5 py-0.2 rounded-full text-[11px]">{{ cart_count }}</span>
+          </a>
 
-        <!-- Signature Lime Register Pill -->
-        <a href="/auth/register"
-           class="btn-lime px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold">
-          <span>Register</span>
-          <span aria-hidden="true">→</span>
-        </a>
+          {% if is_logged_in %}
+            <a href="/dashboard/{{ current_user.role }}"
+               class="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-neutral-300 hover:border-charcoal text-xs font-medium transition">
+              <span>{{ current_user.role | capitalize }} Hub</span>
+            </a>
+            <a href="/auth/logout"
+               class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-charcoal hover:bg-neutral-800 text-white text-xs font-semibold transition">
+              <span>Logout</span>
+            </a>
+          {% else %}
+            <a href="/auth/login"
+               class="inline-flex items-center px-4 py-2 rounded-full border border-neutral-300 hover:border-charcoal text-xs font-semibold transition">
+              Sign In
+            </a>
+            <a href="/auth/register"
+               class="btn-lime px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold">
+              <span>Register</span>
+              <span aria-hidden="true">→</span>
+            </a>
+          {% endif %}
+        {% endif %}
       </div>
     </nav>
 
@@ -107,9 +143,11 @@
       <span>•</span>
       <a href="/reviews" class="whitespace-nowrap hover:text-charcoal">Reviews</a>
       <span>•</span>
-      <a href="/help" class="whitespace-nowrap hover:text-charcoal">FAQ</a>
+      <a href="/help" class="whitespace-nowrap hover:text-charcoal">Help</a>
+      {% if not is_home_page and is_logged_in %}
       <span>•</span>
       <a href="/dashboard/{{ current_user.role }}" class="whitespace-nowrap font-bold text-charcoal">{{ current_user.role|capitalize }} Hub</a>
+      {% endif %}
     </div>
   </header>
 

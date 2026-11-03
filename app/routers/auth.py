@@ -32,6 +32,7 @@ def login_submit(
     for user in USERS_DB:
         if user["email"].lower() == email.strip().lower():
             request.session["user_email"] = user["email"]
+            request.session["is_logged_in"] = True
             set_flash_message(
                 request,
                 f"Signed in as {user['name']} ({user['role'].capitalize()} Dashboard ready).",
@@ -53,6 +54,7 @@ def login_submit(
     }
     USERS_DB.append(new_user)
     request.session["user_email"] = new_user["email"]
+    request.session["is_logged_in"] = True
     set_flash_message(request, f"Welcome back, {new_user['name']}!", "success")
     return RedirectResponse(url="/dashboard/tenant", status_code=303)
 
@@ -97,12 +99,21 @@ def register_submit(
     }
     USERS_DB.append(new_user)
     request.session["user_email"] = new_user["email"]
+    request.session["is_logged_in"] = True
     set_flash_message(
         request,
         f"Account created! Welcome to Estate, {new_user['name']} ({clean_role.capitalize()}).",
         "success",
     )
     return RedirectResponse(url=f"/dashboard/{clean_role}", status_code=303)
+
+
+@router.get("/auth/logout")
+def logout_user(request: Request):
+    request.session.pop("user_email", None)
+    request.session["is_logged_in"] = False
+    set_flash_message(request, "You have been logged out of your Estate portal.", "info")
+    return RedirectResponse(url="/", status_code=303)
 
 
 @router.get("/auth/switch/{role}")
@@ -112,6 +123,7 @@ def switch_demo_role(request: Request, role: str):
     for user in USERS_DB:
         if user["role"] == target_role:
             request.session["user_email"] = user["email"]
+            request.session["is_logged_in"] = True
             set_flash_message(
                 request,
                 f"Switched active role to {user['name']} ({target_role.upper()}).",

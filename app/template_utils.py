@@ -39,6 +39,11 @@ templates.env.filters["naira_compact"] = format_naira_compact
 
 def render_page(request: Request, template_name: str, context: dict[str, Any] | None = None):
     """Render a Jinja2 template with common layout context (active user, cart count, flash message)."""
+    path = request.url.path
+    is_home_page = path == "/"
+    is_dashboard_page = path.startswith("/dashboard")
+    is_logged_in = bool(request.session.get("is_logged_in", False)) or is_dashboard_page
+
     ctx: dict[str, Any] = {
         "request": request,
         "current_user": get_current_user(request),
@@ -46,6 +51,9 @@ def render_page(request: Request, template_name: str, context: dict[str, Any] | 
         "cart_ids": get_cart_ids(request),
         "cart_count": len(get_cart_ids(request)),
         "flash": get_flash_message(request),
+        "is_home_page": is_home_page,
+        "is_dashboard_page": is_dashboard_page,
+        "is_logged_in": is_logged_in,
     }
     if context:
         ctx.update(context)

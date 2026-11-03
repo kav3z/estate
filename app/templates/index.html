@@ -1,0 +1,614 @@
+{% extends "base.html" %}
+{% block title %}Estate — Revitalize Urban Living with Verified Homes & Land{% endblock %}
+
+{% block content %}
+<!-- =====================================================================
+     HERO SECTION (Modeled after Reference Board 2)
+     ===================================================================== -->
+<section class="max-w-7xl mx-auto px-4 sm:px-8 pt-4 pb-12">
+  <div class="relative rounded-4xl sm:rounded-5xl overflow-hidden min-h-[560px] sm:min-h-[620px] flex flex-col justify-end p-6 sm:p-12 shadow-lg border border-neutral-200">
+    <!-- Architectural Background Photo -->
+    <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1800&q=85"
+         alt="Estate Modern Residence"
+         class="absolute inset-0 w-full h-full object-cover" />
+    <!-- Gradient Overlay for crisp text legibility -->
+    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/15"></div>
+
+    <!-- Top Verified Badge Pill inside Hero -->
+    <div class="relative z-10 mb-auto flex flex-wrap items-center justify-between gap-3 pt-2">
+      <div class="inline-flex items-center gap-2 bg-white/90 backdrop-blur-md text-charcoal px-4 py-1.5 rounded-full text-xs font-semibold shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-lime border border-charcoal"></span>
+        <span>Verified Listings • Transparent Fees • 7-Day Availability Reconfirmed</span>
+      </div>
+      <a href="/matching"
+         class="inline-flex items-center gap-2 bg-charcoal/80 hover:bg-charcoal text-white backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-medium border border-white/20 transition">
+        <span>Try Smart Property Matcher</span>
+        <span class="text-lime">→</span>
+      </a>
+    </div>
+
+    <!-- Editorial Headline -->
+    <div class="relative z-10 max-w-3xl mb-8 mt-12">
+      <p class="text-white/85 text-xs sm:text-sm font-medium tracking-wide mb-2">
+        crafting lifestyle, redefining urban residences & verified land together.
+      </p>
+      <h1 class="text-4xl sm:text-6xl lg:text-[64px] font-normal text-white tracking-tight leading-[1.06]">
+        Revitalize urban living with <span class="estate-brand-dark">Estate</span> homes
+      </h1>
+    </div>
+
+    <!-- Bottom Row: Floating Pill Search Filter Bar + "Meet our Team / Verified Landlords" Avatar Stack -->
+    <div class="relative z-10 flex flex-col xl:flex-row items-stretch xl:items-end justify-between gap-6">
+      <!-- Floating White Search Pill -->
+      <form action="/properties" method="get"
+            class="bg-white rounded-3xl sm:rounded-full p-3 sm:px-6 sm:py-3.5 shadow-xl flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-6 flex-1 max-w-3xl">
+        <div class="flex-1 min-w-[110px]">
+          <label class="block text-[11px] text-neutral-400 font-medium mb-0.5">category</label>
+          <select name="category" class="w-full text-sm font-semibold text-charcoal bg-transparent focus:outline-none cursor-pointer">
+            <option value="All">Rent / Buy</option>
+            <option value="Rent">Rent Only</option>
+            <option value="Buy">Buy (House / Land)</option>
+          </select>
+        </div>
+
+        <div class="hidden sm:block w-px h-8 bg-neutral-200"></div>
+
+        <div class="flex-1 min-w-[130px]">
+          <label class="block text-[11px] text-neutral-400 font-medium mb-0.5">location</label>
+          <select name="location" class="w-full text-sm font-semibold text-charcoal bg-transparent focus:outline-none cursor-pointer">
+            <option value="All">Lagos & Abuja</option>
+            <option value="Lekki">Lekki Phase 1</option>
+            <option value="Ikoyi">Old Ikoyi</option>
+            <option value="Ikeja">Ikeja GRA</option>
+            <option value="Victoria Island">Victoria Island</option>
+            <option value="Yaba">Yaba Corridor</option>
+            <option value="Maitama">Maitama, Abuja</option>
+            <option value="Epe">Epe Land Belt</option>
+          </select>
+        </div>
+
+        <div class="hidden sm:block w-px h-8 bg-neutral-200"></div>
+
+        <div class="flex-1 min-w-[115px]">
+          <label class="block text-[11px] text-neutral-400 font-medium mb-0.5">type</label>
+          <select name="property_type" class="w-full text-sm font-semibold text-charcoal bg-transparent focus:outline-none cursor-pointer">
+            <option value="All">House & Land</option>
+            <option value="Duplex">Duplex</option>
+            <option value="Bungalow">Bungalow</option>
+            <option value="Apartment">Apartment</option>
+            <option value="Land">Verified Land</option>
+          </select>
+        </div>
+
+        <div class="hidden sm:block w-px h-8 bg-neutral-200"></div>
+
+        <div class="flex-1 min-w-[125px]">
+          <label class="block text-[11px] text-neutral-400 font-medium mb-0.5">price cap</label>
+          <select name="max_price" class="w-full text-sm font-semibold text-charcoal bg-transparent focus:outline-none cursor-pointer">
+            <option value="">₦ Any Budget</option>
+            <option value="6000000">Up to ₦6M / yr</option>
+            <option value="15000000">Up to ₦15M</option>
+            <option value="100000000">Up to ₦100M</option>
+            <option value="300000000">Up to ₦300M</option>
+          </select>
+        </div>
+
+        <button type="submit"
+                class="w-full sm:w-11 h-11 rounded-full bg-lime hover:bg-lime-hover text-charcoal flex items-center justify-center shrink-0 transition shadow-sm"
+                title="Search Verified Properties">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <span class="sm:hidden ml-2 text-xs font-bold">Search Listings</span>
+        </button>
+      </form>
+
+      <!-- "Meet our Team / Verified Authority" Avatar Cluster -->
+      <div class="flex items-center gap-4 bg-black/45 backdrop-blur-md border border-white/15 rounded-full px-4 py-2.5 self-start xl:self-auto">
+        <div>
+          <p class="text-[11px] text-white/80 font-medium mb-1">Verified Landlords & Surveyors</p>
+          <div class="flex items-center -space-x-2.5">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" class="w-8 h-8 rounded-full border-2 border-white object-cover" alt="Agent" />
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80" class="w-8 h-8 rounded-full border-2 border-white object-cover" alt="Landlord" />
+            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=120&q=80" class="w-8 h-8 rounded-full border-2 border-white object-cover" alt="Inspector" />
+            <img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=120&q=80" class="w-8 h-8 rounded-full border-2 border-white object-cover" alt="Surveyor" />
+            <span class="w-8 h-8 rounded-full border-2 border-lime bg-charcoal text-lime text-[10px] font-bold inline-flex items-center justify-center">100%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     SECTION 01: about[01] — "Building dreams, creating homes"
+     (Modeled directly on Reference Image 1 Top Left)
+     ===================================================================== -->
+<section class="max-w-7xl mx-auto px-4 sm:px-8 py-14">
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+    <div>
+      <h2 class="text-3xl sm:text-5xl font-normal tracking-tight text-charcoal mb-3">
+        Building dreams, creating homes
+      </h2>
+      <p class="text-neutral-500 text-sm sm:text-base max-w-xl leading-relaxed">
+        Empowering your homeownership and rental journey through physical inspection verification,
+        transparent upfront Naira charges, and 7-day availability reconfirmation.
+      </p>
+    </div>
+
+    <div class="flex flex-col items-start md:items-end gap-2 shrink-0">
+      <span class="text-xs text-neutral-400 font-medium">{{ counts.verified_units }} out of {{ counts.total_units }} verified units</span>
+      <a href="/properties" class="btn-outline-pill px-5 py-2.5 text-xs sm:text-sm">
+        <span>Discover More</span>
+        <span>→</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- 4-Column Editorial Bento Collage (Matching Reference Image 1) -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 items-stretch">
+    <!-- Card 1: Geometric House Mask Card -->
+    <div class="lg:col-span-3 bento-card p-5 flex flex-col justify-between">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-1.5">
+          <img src="/static/images/logo.png" alt="Estate" class="w-5 h-5 rounded-full" />
+          <span class="estate-brand text-xs">Estate</span>
+        </div>
+        <span class="text-[11px] bg-lime px-2.5 py-0.5 rounded-full font-semibold">Verified</span>
+      </div>
+
+      <div class="relative my-2">
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80"
+             alt="Verified Home"
+             class="w-full h-44 object-cover house-pentagon-mask" />
+      </div>
+
+      <div class="pt-3">
+        <p class="text-sm font-semibold text-charcoal leading-snug">
+          Transforming verified houses into trusted homes
+        </p>
+        <p class="text-xs text-neutral-500 mt-1">
+          Every advertiser's C of O or Landlord Mandate is confirmed before publishing.
+        </p>
+        <div class="flex items-center gap-2 mt-4">
+          <a href="/properties" class="w-8 h-8 rounded-full border border-neutral-300 inline-flex items-center justify-center text-xs text-neutral-500 hover:border-charcoal">←</a>
+          <a href="/properties?verified_only=true" class="w-8 h-8 rounded-full bg-lime text-charcoal inline-flex items-center justify-center text-xs font-bold">→</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Mobile Preview & Transparent Cost Breakdown Card -->
+    <div class="lg:col-span-3 bento-card p-5 flex flex-col justify-between bg-white">
+      <div>
+        <span class="inline-block text-[11px] font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-alabaster border border-neutral-200 mb-3">
+          Transparent Charges
+        </span>
+        <h3 class="text-base font-semibold text-charcoal">Zero Hidden Agency or Legal Surprises</h3>
+        <p class="text-xs text-neutral-500 mt-1 leading-relaxed">
+          See the complete commitment (Rent + Agency + Legal + Caution + Service Charge) before you book an inspection.
+        </p>
+      </div>
+
+      <div class="my-4 bg-alabaster rounded-2xl p-3.5 border border-neutral-200/80 text-xs space-y-1.5">
+        <div class="flex justify-between text-neutral-600">
+          <span>Annual Rent (Lekki)</span>
+          <span class="font-semibold text-charcoal">₦8,500,000</span>
+        </div>
+        <div class="flex justify-between text-neutral-600">
+          <span>Agency & Legal (15%)</span>
+          <span class="font-semibold text-charcoal">₦1,275,000</span>
+        </div>
+        <div class="flex justify-between text-neutral-600">
+          <span>Caution & Service</span>
+          <span class="font-semibold text-charcoal">₦1,150,000</span>
+        </div>
+        <div class="border-t border-neutral-200 pt-1.5 flex justify-between font-bold text-charcoal">
+          <span>Full Commitment</span>
+          <span class="bg-lime px-2 py-0.5 rounded-full">₦10,925,000</span>
+        </div>
+      </div>
+
+      <a href="/properties/1" class="w-full py-2.5 px-4 rounded-full bg-charcoal text-white text-xs font-semibold text-center hover:bg-neutral-800 transition">
+        Inspect Live Breakdown →
+      </a>
+    </div>
+
+    <!-- Card 3: Architectural Concrete Perspective + 7-Day Update Rule -->
+    <div class="lg:col-span-3 relative rounded-3xl overflow-hidden min-h-[290px] group">
+      <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=700&q=80"
+           alt="Architectural Concrete Residence"
+           class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent p-5 flex flex-col justify-between">
+        <span class="self-start bg-lime text-charcoal text-[11px] font-bold px-3 py-1 rounded-full">
+          7-Day Reconfirmation
+        </span>
+        <div class="text-white">
+          <p class="text-sm font-semibold leading-snug">Landlords reconfirm availability every 7 days</p>
+          <p class="text-[11px] text-white/80 mt-1">Rented homes are marked "Unavailable" immediately upon checkout.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: Satisfied Customers & Reviews Preview -->
+    <div class="lg:col-span-3 bento-card p-5 flex flex-col justify-between relative overflow-hidden">
+      <div class="flex items-center justify-between">
+        <span class="px-3 py-1 rounded-full border border-neutral-300 text-[11px] font-medium bg-white">
+          elegant tranquility
+        </span>
+        <a href="/reviews" class="px-3 py-1 rounded-full bg-white border border-neutral-200 text-xs font-semibold hover:border-charcoal transition">
+          Reviews →
+        </a>
+      </div>
+
+      <div class="my-4">
+        <p class="text-sm text-neutral-600 leading-relaxed">
+          <strong class="text-charcoal">Navigate</strong> online, discover your verified dream home or dry land plot today.
+        </p>
+        <div class="mt-3 p-3 rounded-2xl bg-white border border-neutral-200/80 text-xs text-neutral-600 italic">
+          "Saved ₦700k in the Deal Room and never paid a single fake inspection fee!"
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-3.5 border border-neutral-200 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-semibold text-charcoal mb-1.5">Satisfied tenants & buyers</p>
+          <div class="flex items-center -space-x-2">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" class="w-7 h-7 rounded-full border-2 border-white object-cover" alt="User" />
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" class="w-7 h-7 rounded-full border-2 border-white object-cover" alt="User" />
+            <img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=100&q=80" class="w-7 h-7 rounded-full border-2 border-white object-cover" alt="User" />
+            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=100&q=80" class="w-7 h-7 rounded-full border-2 border-white object-cover" alt="User" />
+          </div>
+        </div>
+        <span class="text-sm font-bold text-charcoal bg-lime/60 px-2.5 py-1 rounded-full">4.95★</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     SECTION 02: home[02] — "Homes available for your dreams"
+     (Modeled directly on Reference Image 2 & 3 Property Cards with Lime Price Pills)
+     ===================================================================== -->
+<section class="max-w-7xl mx-auto px-4 sm:px-8 py-12">
+  <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+    <div>
+      <h2 class="text-3xl sm:text-5xl font-normal tracking-tight text-charcoal">
+        Homes & land available for your dreams
+      </h2>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="text-right hidden md:block mr-2">
+        <p class="text-xs font-semibold text-charcoal">Near you in Lagos & Abuja</p>
+        <p class="text-[11px] text-neutral-500">{{ counts.houses }} houses • {{ counts.apartments }} apartments • {{ counts.lands }} lands</p>
+      </div>
+      <a href="/properties" class="btn-lime px-5 py-2.5 text-xs sm:text-sm">
+        <span>View All {{ counts.total_units }} Listings</span>
+        <span>↗</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Property Cards Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    {% for prop in properties[:4] %}
+    <div class="group flex flex-col justify-between rounded-3xl border border-neutral-200/90 bg-white p-3.5 hover:shadow-xl transition">
+      <div>
+        <!-- Image Container with Top-Left Lime Price Pill & Bottom-Right Circular Arrow -->
+        <div class="relative h-64 rounded-2xl overflow-hidden mb-4">
+          <img src="{{ prop.image_url }}" alt="{{ prop.title }}"
+               class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/15"></div>
+
+          <!-- Top Row: Lime Price Pill + Verification Shield -->
+          <div class="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
+            <span class="bg-lime text-charcoal font-bold text-xs px-3 py-1.5 rounded-full shadow-sm">
+              {{ prop.base_price | naira_compact }}{% if prop.category == 'Rent' %}/yr{% endif %}
+            </span>
+            {% if prop.is_verified %}
+            <span class="bg-white/95 backdrop-blur text-charcoal text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+              Verified
+            </span>
+            {% endif %}
+          </div>
+
+          <!-- Status / 7-Day Freshness Pill Bottom Left -->
+          <div class="absolute bottom-3 left-3">
+            {% if prop.status == 'Available' %}
+            <span class="bg-charcoal/85 backdrop-blur text-white text-[10px] font-medium px-2.5 py-1 rounded-full">
+              Confirmed {{ prop.days_since_confirmed }}d ago • {{ prop.days_until_reconfirmation_due }}d left
+            </span>
+            {% else %}
+            <span class="bg-rose-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
+              Unavailable (Rented)
+            </span>
+            {% endif %}
+          </div>
+
+          <!-- Bottom-Right Circular Arrow Link -->
+          <a href="/properties/{{ prop.id }}"
+             class="absolute bottom-3 right-3 circle-arrow-btn bg-white text-charcoal shadow-md"
+             title="View Full Cost Breakdown">
+            ↗
+          </a>
+        </div>
+
+        <!-- Title & Subtitle -->
+        <div class="px-1">
+          <div class="flex items-center justify-between gap-2 text-[11px] text-neutral-500 mb-1">
+            <span>{{ prop.category }} • {{ prop.property_type }}</span>
+            {% if prop.is_negotiable %}
+            <span class="text-emerald-700 font-semibold">Negotiable Deal Room</span>
+            {% else %}
+            <span>Fixed Price</span>
+            {% endif %}
+          </div>
+          <a href="/properties/{{ prop.id }}" class="block font-semibold text-base text-charcoal group-hover:underline line-clamp-1">
+            {{ prop.title }}
+          </a>
+          <p class="text-xs text-neutral-500 mt-0.5">{{ prop.location }}</p>
+        </div>
+      </div>
+
+      <!-- Transparent Commitment Footer inside Card -->
+      <div class="mt-4 pt-3 border-t border-neutral-100 px-1 flex items-center justify-between text-xs">
+        <div>
+          <span class="text-[10px] text-neutral-400 block">Full Upfront Commitment</span>
+          <span class="font-bold text-charcoal">{{ prop.total_initial_commitment | naira }}</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          {% if prop.status == 'Available' %}
+          <form action="/transactions/cart/add/{{ prop.id }}" method="post">
+            <input type="hidden" name="redirect_to" value="/transactions/cart" />
+            <button type="submit" class="px-3 py-1.5 rounded-full bg-alabaster hover:bg-lime text-charcoal font-semibold text-[11px] border border-neutral-200 transition">
+              + Select
+            </button>
+          </form>
+          {% endif %}
+          <a href="/properties/{{ prop.id }}" class="px-3 py-1.5 rounded-full bg-charcoal text-white font-semibold text-[11px] hover:bg-neutral-800 transition">
+            Details
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- =====================================================================
+     SECTION 03: service[03] — "tailored living solutions"
+     (Modeled directly on Reference Image 1 Bottom Left & Image 3 Right)
+     ===================================================================== -->
+<section class="max-w-7xl mx-auto px-4 sm:px-8 py-14">
+  <div class="bento-card p-6 sm:p-12 bg-alabaster">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+      <!-- Left Architectural Geometric Cutout Showcase -->
+      <div class="lg:col-span-6 relative bg-white rounded-4xl p-6 sm:p-8 border border-neutral-200/80 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <span class="section-index">tailored service</span>
+          <span class="bg-lime text-charcoal text-xs font-semibold px-3.5 py-1.5 rounded-full inline-flex items-center gap-1.5">
+            <span>✦</span> personalized touch
+          </span>
+        </div>
+
+        <div class="relative rounded-3xl overflow-hidden h-72 sm:h-80 my-2">
+          <img src="https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1000&q=85"
+               alt="Tailored Living Architecture"
+               class="w-full h-full object-cover house-pentagon-mask" />
+        </div>
+
+        <div class="flex items-end justify-between gap-4 mt-4 pt-2">
+          <a href="/matching" class="circle-arrow-btn bg-charcoal text-white shrink-0">↗</a>
+          <p class="text-xs sm:text-sm text-neutral-600 max-w-xs text-right">
+            Indulge in a personalized sanctuary, where verified authority meets structured negotiation and escrow protection.
+          </p>
+        </div>
+      </div>
+
+      <!-- Right Editorial Content & Feature Pills -->
+      <div class="lg:col-span-6 text-center lg:text-left flex flex-col items-center lg:items-start">
+        <p class="text-xs font-medium text-neutral-500 flex items-center gap-1.5 mb-2">
+          <span>⬡</span> designing comfort & transaction certainty
+        </p>
+        <h2 class="text-3xl sm:text-5xl font-normal tracking-tight text-charcoal mb-4">
+          tailored living solutions
+        </h2>
+        <p class="text-neutral-500 text-sm sm:text-base max-w-md mb-8 leading-relaxed">
+          Experience personalized property discovery, live Deal Room price negotiation, and multi-property checkout designed for you.
+        </p>
+
+        <!-- Signature Feature Pill Cloud (Matching Reference Image 1) -->
+        <div class="flex flex-wrap justify-center lg:justify-start gap-3 mb-9 max-w-lg">
+          <a href="/properties?verified_only=true" class="px-4 py-2.5 rounded-full bg-white border border-neutral-200/90 text-xs font-medium text-charcoal hover:border-charcoal transition inline-flex items-center gap-2 shadow-sm">
+            <span>✦</span> verified authority
+          </a>
+          <a href="/properties/1" class="px-4 py-2.5 rounded-full bg-white border border-neutral-200/90 text-xs font-medium text-charcoal hover:border-charcoal transition inline-flex items-center gap-2 shadow-sm">
+            <span>◈</span> transparent rental charges
+          </a>
+          <a href="/transactions/negotiate/1" class="px-4 py-2.5 rounded-full bg-white border border-neutral-200/90 text-xs font-medium text-charcoal hover:border-charcoal transition inline-flex items-center gap-2 shadow-sm">
+            <span>⇄</span> structured deal room
+          </a>
+          <a href="/matching" class="px-4 py-2.5 rounded-full bg-white border border-neutral-200/90 text-xs font-medium text-charcoal hover:border-charcoal transition inline-flex items-center gap-2 shadow-sm">
+            <span>❖</span> smart property matching
+          </a>
+          <a href="/dashboard/landlord" class="px-4 py-2.5 rounded-full bg-white border border-neutral-200/90 text-xs font-medium text-charcoal hover:border-charcoal transition inline-flex items-center gap-2 shadow-sm">
+            <span>▣</span> landlord automation hub
+          </a>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-4">
+          <a href="/matching" class="btn-lime px-7 py-3.5 text-sm">
+            <span>Explore Smart Matching</span>
+            <span>→</span>
+          </a>
+          <a href="/transactions/negotiate/1" class="btn-outline-pill px-6 py-3.5 text-sm">
+            <span>Enter Deal Room</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     SECTION 04: neighbourhood[04] — Neighbourhood Intelligence Preview
+     ===================================================================== -->
+<section class="max-w-7xl mx-auto px-4 sm:px-8 py-12">
+  <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+    <div>
+      <h2 class="text-3xl sm:text-4xl font-normal tracking-tight text-charcoal">
+        Verified Neighbourhood Intelligence
+      </h2>
+      <p class="text-sm text-neutral-500 mt-1">
+        Real electricity hours, water treatment, flood drainage, road quality, and security scores verified by local residents.
+      </p>
+    </div>
+    <a href="/neighbourhoods" class="btn-outline-pill px-5 py-2.5 text-xs sm:text-sm self-start sm:self-auto">
+      <span>Explore All Areas & Resident Feedback</span>
+      <span>→</span>
+    </a>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    {% for nb in neighbourhoods %}
+    <a href="/neighbourhoods?area={{ nb.key }}"
+       class="bento-card p-5 bg-white hover:border-charcoal transition flex flex-col justify-between group">
+      <div>
+        <div class="relative h-40 rounded-2xl overflow-hidden mb-4">
+          <img src="{{ nb.image }}" alt="{{ nb.name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent"></div>
+          <span class="absolute bottom-3 left-3 text-white font-semibold text-sm">{{ nb.name }}</span>
+          <span class="absolute top-3 right-3 bg-lime text-charcoal text-[11px] font-bold px-2.5 py-1 rounded-full">
+            ⚡ {{ nb.electricity_hours }}h/day
+          </span>
+        </div>
+
+        <p class="text-xs text-neutral-500 mb-3 line-clamp-1">{{ nb.tagline }}</p>
+
+        <div class="space-y-2 text-xs">
+          <div class="flex justify-between py-1 border-b border-neutral-100">
+            <span class="text-neutral-500">Water Quality</span>
+            <span class="font-semibold text-charcoal">{{ nb.water_rating }}</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-neutral-100">
+            <span class="text-neutral-500">Drainage (Flood-Free)</span>
+            <span class="font-semibold text-charcoal">{{ nb.drainage_rating }}</span>
+          </div>
+          <div class="flex justify-between py-1">
+            <span class="text-neutral-500">Security Index</span>
+            <span class="font-semibold text-emerald-700">{{ nb.security_rating }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-neutral-100 flex items-center justify-between text-xs font-semibold text-charcoal">
+        <span>Read Resident Reports</span>
+        <span class="w-7 h-7 rounded-full bg-lime inline-flex items-center justify-center">↗</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- =====================================================================
+     SECTION 05 & 06: Accountability & Mobile Showcase Banner
+     (Modeled on Reference Image 1 Right Mobile Mockups & Image 4 Bottom)
+     ===================================================================== -->
+<section class="max-w-7xl mx-auto px-4 sm:px-8 py-12">
+  <div class="relative rounded-4xl overflow-hidden bg-charcoal text-white p-8 sm:p-14">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+      <div class="lg:col-span-6 space-y-5">
+        <span class="inline-block bg-lime text-charcoal text-xs font-bold px-3.5 py-1 rounded-full">
+          Accountability & Deal Room
+        </span>
+        <h2 class="text-3xl sm:text-5xl font-normal tracking-tight leading-tight">
+          Buy, sell and rent your home with total accountability.
+        </h2>
+        <p class="text-white/75 text-sm sm:text-base leading-relaxed">
+          Both landlords and tenants carry documented reputation scores and have access to our
+          Dispute & Complaint Resolution Ledger. Select one or multiple properties and check out
+          through the <span class="estate-brand-dark">Estate</span> Escrow Gateway.
+        </p>
+
+        <div class="flex flex-wrap items-center gap-3 pt-2">
+          <a href="/dashboard/tenant" class="btn-lime px-6 py-3 text-xs sm:text-sm">
+            <span>Open Tenant Dashboard</span>
+            <span>→</span>
+          </a>
+          <a href="/dashboard/landlord" class="px-5 py-3 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-semibold transition">
+            Landlord Dashboard
+          </a>
+          <a href="/dashboard/admin" class="px-5 py-3 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-semibold transition">
+            Admin Compliance Hub
+          </a>
+        </div>
+      </div>
+
+      <!-- Dual Interactive Phone Cards (Modeled on Reference Image 1 Right Side) -->
+      <div class="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <!-- Phone Mockup 1: Serenity Pines Card -->
+        <div class="bg-white text-charcoal rounded-3xl p-4 shadow-2xl border border-white/20">
+          <div class="flex items-center justify-between text-[11px] text-neutral-500 mb-2.5">
+            <span class="font-semibold text-charcoal">● 3D Verified Tour</span>
+            <span class="bg-alabaster px-2 py-0.5 rounded-full font-medium">EST-VER-8821</span>
+          </div>
+          <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=600&q=80"
+               alt="Serenity Pines"
+               class="w-full h-36 object-cover rounded-2xl mb-3" />
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <h4 class="font-bold text-sm leading-snug">Serenity Pines Duplex</h4>
+              <p class="text-[11px] text-neutral-500">Lekki Phase 1 • ★ 4.9 (65)</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 my-3 text-center bg-alabaster p-2 rounded-xl text-[11px]">
+            <div>
+              <span class="font-bold block">340 m²</span>
+              <span class="text-neutral-400 text-[10px]">Area</span>
+            </div>
+            <div>
+              <span class="font-bold block">4</span>
+              <span class="text-neutral-400 text-[10px]">Beds</span>
+            </div>
+            <div>
+              <span class="font-bold block">4</span>
+              <span class="text-neutral-400 text-[10px]">Baths</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between pt-1">
+            <div>
+              <span class="font-extrabold text-sm block">₦8,500,000</span>
+              <span class="text-[10px] text-neutral-400">Negotiable in Deal Room</span>
+            </div>
+            <a href="/properties/1" class="btn-lime px-4 py-1.5 text-xs">viewing</a>
+          </div>
+        </div>
+
+        <!-- Phone Mockup 2: Platform Reviews & Accountability Snapshot -->
+        <div class="bg-white/10 backdrop-blur-md rounded-3xl p-5 border border-white/15 flex flex-col justify-between">
+          <div>
+            <span class="text-lime text-xs font-bold uppercase tracking-wider">Platform Reviews</span>
+            <h4 class="text-xl font-semibold text-white mt-1">Trusted by Verified Tenants & Landlords</h4>
+            <div class="mt-4 space-y-3">
+              {% for rev in platform_reviews[:2] %}
+              <div class="bg-black/35 rounded-2xl p-3 border border-white/10 text-xs">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="font-semibold text-white">{{ rev.user_name }}</span>
+                  <span class="text-lime font-bold">{{ "★" * rev.rating }}</span>
+                </div>
+                <p class="text-white/75 line-clamp-2 text-[11px]">"{{ rev.comment }}"</p>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <a href="/reviews" class="btn-lime w-full py-2.5 text-xs font-bold mt-4">
+            Read & Post Platform Reviews →
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+

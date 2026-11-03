@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}Multi-Property Selection Tray — Estate{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto px-4 sm:px-8 py-10">
+  <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+    <div>
+      <h1 class="text-3xl sm:text-5xl font-normal tracking-tight text-charcoal">
+        Your Multi-Property Selection Tray
+      </h1>
+      <p class="text-sm text-neutral-500 mt-1">
+        Select one or more verified properties (houses or land plots), review the complete transparent commitment, and proceed to the <span class="estate-brand">Estate</span> Escrow Payment Gateway.
+      </p>
+    </div>
+
+    <a href="/properties" class="btn-outline-pill px-5 py-2.5 text-xs">
+      + Browse More Listings
+    </a>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <!-- Left 8 Columns: Selected Properties -->
+    <div class="lg:col-span-8 space-y-6">
+      {% if cart_items %}
+        {% for item in cart_items %}
+        {% set prop = item.property %}
+        <div class="rounded-4xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm">
+          <div class="flex flex-col sm:flex-row gap-5 items-start sm:items-center justify-between">
+            <div class="flex items-center gap-4">
+              <img src="{{ prop.image_url }}" alt="{{ prop.title }}" class="w-24 h-24 rounded-2xl object-cover border border-neutral-200 shrink-0" />
+              <div>
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                  <span class="bg-lime text-charcoal text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                    {{ prop.verification_code }}
+                  </span>
+                  <span class="text-xs text-neutral-500 font-medium">{{ prop.category }} • {{ prop.property_type }}</span>
+                  {% if item.is_negotiated_discount %}
+                  <span class="bg-emerald-100 text-emerald-900 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                    Deal Room Discount (-{{ item.savings | naira }})
+                  </span>
+                  {% endif %}
+                </div>
+
+                <a href="/properties/{{ prop.id }}" class="text-lg font-bold text-charcoal hover:underline block">
+                  {{ prop.title }}
+                </a>
+                <p class="text-xs text-neutral-500">📍 {{ prop.location }} • Landlord: {{ prop.landlord_name }}</p>
+              </div>
+            </div>
+
+            <div class="flex sm:flex-col items-end justify-between w-full sm:w-auto gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-neutral-100">
+              <div class="text-left sm:text-right">
+                <span class="text-[10px] text-neutral-400 uppercase font-bold block">Full Item Commitment</span>
+                <span class="text-xl font-extrabold text-charcoal">{{ item.item_total | naira }}</span>
+              </div>
+
+              <div class="flex items-center gap-2">
+                {% if prop.is_negotiable %}
+                <a href="/transactions/negotiate/{{ prop.id }}" class="text-xs font-semibold underline text-charcoal hover:text-emerald-700">
+                  Negotiate
+                </a>
+                {% endif %}
+                <form action="/transactions/cart/remove/{{ prop.id }}" method="post">
+                  <button type="submit" class="px-3 py-1 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold transition">
+                    Remove
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Transparent Breakdown Row -->
+          <div class="mt-4 pt-3 border-t border-neutral-100 grid grid-cols-2 sm:grid-cols-5 gap-2 text-[11px] bg-alabaster p-3 rounded-2xl">
+            <div>
+              <span class="text-neutral-400 block">Base ({{ prop.category }})</span>
+              <span class="font-bold text-charcoal">{{ item.effective_base_price | naira }}</span>
+            </div>
+            <div>
+              <span class="text-neutral-400 block">Agency Fee</span>
+              <span class="font-semibold text-charcoal">{{ prop.agency_fee | naira }}</span>
+            </div>
+            <div>
+              <span class="text-neutral-400 block">Legal / Deed</span>
+              <span class="font-semibold text-charcoal">{{ (prop.legal_fee + prop.survey_or_deed_fee) | naira }}</span>
+            </div>
+            <div>
+              <span class="text-neutral-400 block">Caution Deposit</span>
+              <span class="font-semibold text-charcoal">{{ prop.caution_deposit | naira }}</span>
+            </div>
+            <div>
+              <span class="text-neutral-400 block">Service Charge</span>
+              <span class="font-semibold text-charcoal">{{ prop.service_charge | naira }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+      <div class="bento-card p-12 text-center bg-alabaster">
+        <h3 class="text-xl font-bold text-charcoal">Your Selection Tray is Empty</h3>
+        <p class="text-xs text-neutral-500 mt-1 mb-5">Select one or more properties below or from the catalog to test checkout.</p>
+        <a href="/properties" class="btn-lime px-6 py-3 text-xs font-bold">Browse Verified Listings →</a>
+      </div>
+      {% endif %}
+
+      <!-- Quick-Add Additional Properties for Multi-Property Checkout -->
+      {% if other_available %}
+      <div class="bento-card p-6 bg-alabaster">
+        <h3 class="text-base font-bold text-charcoal mb-1">
+          Add Another Property to Check Out Together
+        </h3>
+        <p class="text-xs text-neutral-500 mb-4">
+          Want to combine a residential lease with a serviced land plot or rent multiple units at once? Click <strong>+ Add to Tray</strong> below:
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          {% for p in other_available[:4] %}
+          <div class="bg-white rounded-2xl p-3.5 border border-neutral-200 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <img src="{{ p.image_url }}" alt="{{ p.title }}" class="w-14 h-14 rounded-xl object-cover shrink-0" />
+              <div class="min-w-0">
+                <p class="text-xs font-bold text-charcoal truncate">{{ p.title }}</p>
+                <p class="text-[11px] text-neutral-500">{{ p.category }} • {{ p.total_initial_commitment | naira }}</p>
+              </div>
+            </div>
+            <form action="/transactions/cart/add/{{ p.id }}" method="post" class="shrink-0">
+              <input type="hidden" name="redirect_to" value="/transactions/cart" />
+              <button type="submit" class="px-3 py-1.5 rounded-full bg-lime text-charcoal text-xs font-bold hover:opacity-90">
+                + Add
+              </button>
+            </form>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Right 4 Columns: Summary & Proceed to Payment Gateway -->
+    <div class="lg:col-span-4 sticky top-24">
+      <div class="rounded-4xl border-2 border-charcoal bg-white p-6 sm:p-7 shadow-xl">
+        <span class="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Escrow Summary</span>
+        <h2 class="text-xl font-bold text-charcoal mt-1 mb-4">Consolidated Commitment</h2>
+
+        <div class="space-y-3 text-xs bg-alabaster rounded-3xl p-4 border border-neutral-200 mb-5">
+          <div class="flex justify-between">
+            <span class="text-neutral-600">Selected Properties:</span>
+            <span class="font-bold text-charcoal">{{ cart_items | length }} Unit(s)</span>
+          </div>
+          {% if total_savings > 0 %}
+          <div class="flex justify-between text-emerald-700 font-semibold">
+            <span>Deal Room Negotiated Savings:</span>
+            <span>-{{ total_savings | naira }}</span>
+          </div>
+          {% endif %}
+          <div class="flex justify-between">
+            <span class="text-neutral-600">Estate Escrow Protection Fee:</span>
+            <span class="font-bold text-emerald-700">₦0 (Included)</span>
+          </div>
+          <div class="border-t-2 border-charcoal pt-3 flex justify-between items-center">
+            <span class="font-extrabold text-charcoal text-sm">Grand Total Due:</span>
+            <span class="text-lg font-extrabold bg-lime px-3 py-1 rounded-full text-charcoal">
+              {{ grand_total | naira }}
+            </span>
+          </div>
+        </div>
+
+        {% if cart_items %}
+        <a href="/transactions/checkout" class="btn-lime w-full py-3.5 text-xs sm:text-sm font-extrabold shadow">
+          <span>Proceed to Estate Payment Gateway</span>
+          <span>→</span>
+        </a>
+        {% endif %}
+
+        <p class="text-[11px] text-neutral-400 text-center mt-4">
+          🔒 Funds are held in Estate Escrow until physical keys/allocation documents are handed over.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+

@@ -1,0 +1,137 @@
+/* Estate — Architectural UI Design System (Modeled after Reference Boards) */
+
+:root {
+  --estate-lime: #C8F169;
+  --estate-lime-hover: #b8e64e;
+  --estate-charcoal: #141517;
+  --estate-alabaster: #F6F7F4;
+  --estate-border: #E8EAE3;
+  --estate-muted: #686D67;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #FFFFFF;
+  color: #141517;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Distinctive Brand Wordmark for the Platform name "Estate" */
+.estate-brand {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-weight: 700;
+  color: #4D7C0F;
+  background-color: rgba(200, 241, 105, 0.35);
+  padding: 0.05rem 0.45rem;
+  border-radius: 0.45rem;
+  letter-spacing: -0.01em;
+  display: inline-block;
+}
+
+.estate-brand-dark {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-weight: 700;
+  color: #C8F169;
+  letter-spacing: -0.01em;
+}
+
+/* Editorial index tags */
+.section-index {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #4A4E48;
+  letter-spacing: -0.01em;
+}
+.section-index sup {
+  font-size: 0.65rem;
+  color: #82877F;
+  margin-left: 2px;
+  font-weight: 600;
+}
+
+/* Signature Lime Pill Button */
+.btn-lime {
+  background-color: var(--estate-lime);
+  color: var(--estate-charcoal);
+  font-weight: 600;
+  border-radius: 9999px;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.btn-lime:hover {
+  background-color: var(--estate-lime-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px -6px rgba(200, 241, 105, 0.65);
+}
+
+/* Outline Pill Button (e.g. Discover More ->) */
+.btn-outline-pill {
+  background-color: #FFFFFF;
+  color: var(--estate-charcoal);
+  border: 1px solid #141517;
+  border-radius: 9999px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-outline-pill:hover {
+  background-color: #141517;
+  color: #FFFFFF;
+}
+
+/* Architectural House / Diamond Geometric Mask (as seen in reference "about[01]" and "service[03]" cards) */
+.house-pentagon-mask {
+  clip-path: polygon(50% 0%, 100% 34%, 100% 100%, 0% 100%, 0% 34%);
+  border-radius: 24px;
+}
+
+.diamond-architectural-frame {
+  border-radius: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Soft Bento Card */
+.bento-card {
+  background-color: var(--estate-alabaster);
+  border-radius: 28px;
+  border: 1px solid var(--estate-border);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.bento-card:hover {
+  box-shadow: 0 20px 40px -20px rgba(20, 21, 23, 0.08);
+}
+
+/* Circular Arrow Button on Property Cards */
+.circle-arrow-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+.circle-arrow-btn:hover {
+  transform: scale(1.08) rotate(8deg);
+}
+
+/* Custom Range Slider in Lime & Charcoal */
+input[type="range"].estate-slider {
+  accent-color: #141517;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+

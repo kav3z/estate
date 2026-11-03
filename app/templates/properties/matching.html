@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}Personalised Property Matching & Inspection Coordinator — Estate{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto px-4 sm:px-8 py-10">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl sm:text-5xl font-normal tracking-tight text-charcoal">
+      Personalised Property Matching & Inspection Coordinator
+    </h1>
+    <p class="text-sm text-neutral-500 mt-2 max-w-2xl">
+      Input your exact housing specifications (Bungalow, Duplex, Apartment, or Land, bedrooms required, budget cap, and minimum daily electricity hours) and our matcher scores every verified listing.
+    </p>
+  </div>
+
+  <!-- Interactive Matching Specification Form -->
+  <form action="/matching" method="get" class="bento-card p-6 sm:p-8 bg-alabaster mb-12">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+      <div>
+        <label class="block text-xs font-bold text-charcoal mb-1.5">Acquisition Mode</label>
+        <select name="category" class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-neutral-200 text-xs font-semibold">
+          <option value="Any" {% if prefs.category == 'Any' %}selected{% endif %}>Rent or Buy</option>
+          <option value="Rent" {% if prefs.category == 'Rent' %}selected{% endif %}>Rent</option>
+          <option value="Buy" {% if prefs.category == 'Buy' %}selected{% endif %}>Buy Outright</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-charcoal mb-1.5">House / Land Type</label>
+        <select name="property_type" class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-neutral-200 text-xs font-semibold">
+          <option value="Any" {% if prefs.property_type == 'Any' %}selected{% endif %}>Any Architecture</option>
+          <option value="Duplex" {% if prefs.property_type == 'Duplex' %}selected{% endif %}>Duplex</option>
+          <option value="Bungalow" {% if prefs.property_type == 'Bungalow' %}selected{% endif %}>Bungalow</option>
+          <option value="Apartment" {% if prefs.property_type == 'Apartment' %}selected{% endif %}>Apartment</option>
+          <option value="Land" {% if prefs.property_type == 'Land' %}selected{% endif %}>Serviced Land</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-charcoal mb-1.5">Bedrooms Required</label>
+        <select name="bedrooms" class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-neutral-200 text-xs font-semibold">
+          <option value="0" {% if prefs.bedrooms == 0 %}selected{% endif %}>0 (Land / Any)</option>
+          <option value="2" {% if prefs.bedrooms == 2 %}selected{% endif %}>2+ Bedrooms</option>
+          <option value="3" {% if prefs.bedrooms == 3 %}selected{% endif %}>3+ Bedrooms</option>
+          <option value="4" {% if prefs.bedrooms == 4 %}selected{% endif %}>4+ Bedrooms</option>
+          <option value="5" {% if prefs.bedrooms == 5 %}selected{% endif %}>5+ Bedrooms</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-charcoal mb-1.5">Max Full Commitment (₦)</label>
+        <input type="number" name="max_budget" value="{{ prefs.max_budget }}" step="500000"
+               class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-neutral-200 text-xs font-semibold" />
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-charcoal mb-1.5">Min Power (hrs/day)</label>
+        <select name="min_power_hours" class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-neutral-200 text-xs font-semibold">
+          <option value="16" {% if prefs.min_power_hours == 16 %}selected{% endif %}>16+ hrs/day</option>
+          <option value="18" {% if prefs.min_power_hours == 18 %}selected{% endif %}>18+ hrs/day</option>
+          <option value="20" {% if prefs.min_power_hours == 20 %}selected{% endif %}>20+ hrs/day</option>
+          <option value="22" {% if prefs.min_power_hours == 22 %}selected{% endif %}>22+ hrs/day</option>
+        </select>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="inline-flex items-center gap-2 text-xs font-semibold text-charcoal cursor-pointer">
+          <input type="checkbox" name="negotiable_only" value="true" {% if prefs.negotiable_only %}checked{% endif %} class="rounded accent-charcoal" />
+          <span>Negotiable Only</span>
+        </label>
+        <button type="submit" class="btn-lime w-full py-2.5 text-xs font-bold">
+          Run Smart Matcher →
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Ranked Results -->
+  <div class="space-y-6">
+    {% for item in matches %}
+    {% set prop = item.property %}
+    <div class="rounded-4xl border border-neutral-200 bg-white p-5 sm:p-6 hover:shadow-lg transition">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <!-- Image -->
+        <div class="lg:col-span-4 relative h-56 rounded-3xl overflow-hidden">
+          <img src="{{ prop.image_url }}" alt="{{ prop.title }}" class="w-full h-full object-cover" />
+          <div class="absolute top-3 left-3 bg-lime text-charcoal font-extrabold text-xs px-3.5 py-1.5 rounded-full shadow">
+            {{ item.match_score }}% Compatibility Match
+          </div>
+          <div class="absolute bottom-3 left-3 bg-charcoal/85 text-white text-[11px] font-medium px-3 py-1 rounded-full">
+            {{ prop.property_type }} • {{ prop.category }}
+          </div>
+        </div>
+
+        <!-- Match Explanation & Specs -->
+        <div class="lg:col-span-5 space-y-3">
+          <div class="flex flex-wrap items-center gap-2">
+            {% for reason in item.match_reasons %}
+            <span class="bg-alabaster border border-neutral-200 text-charcoal text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+              ✓ {{ reason }}
+            </span>
+            {% endfor %}
+          </div>
+
+          <h3 class="text-xl font-bold text-charcoal">
+            <a href="/properties/{{ prop.id }}" class="hover:underline">{{ prop.title }}</a>
+          </h3>
+          {% if prop.property_type == 'Land' %}
+          <p class="text-xs text-neutral-500">📍 {{ prop.location }} • {{ prop.size_sqm }} m² Serviced Plot • 100% Dry Land • ⚡ {{ prop.power_hours_per_day }}h/day corridor power</p>
+          {% else %}
+          <p class="text-xs text-neutral-500">📍 {{ prop.location }} • {{ prop.bedrooms }} Beds • {{ prop.bathrooms }} Baths • {{ prop.size_sqm }} m² • ⚡ {{ prop.power_hours_per_day }}h/day power</p>
+          {% endif %}
+          <p class="text-xs text-neutral-600 line-clamp-2">{{ prop.description }}</p>
+
+          <div class="flex flex-wrap items-center gap-4 pt-1 text-xs">
+            <div>
+              <span class="text-neutral-400 block text-[10px]">Base Price</span>
+              <span class="font-bold text-charcoal">{{ prop.base_price | naira }}</span>
+            </div>
+            <div>
+              <span class="text-neutral-400 block text-[10px]">Full Upfront Commitment</span>
+              <span class="font-extrabold text-emerald-800">{{ prop.total_initial_commitment | naira }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Instant Inspection Coordinator & Selection -->
+        <div class="lg:col-span-3 bg-alabaster rounded-3xl p-4 border border-neutral-200 space-y-2.5">
+          <p class="text-xs font-bold text-charcoal">Coordinate Matched Inspection</p>
+          <form action="/properties/{{ prop.id }}/book-inspection" method="post" class="space-y-2 text-xs">
+            <input type="text" name="preferred_date" value="Saturday, 14 Nov 2026"
+                   class="w-full px-3 py-1.5 rounded-xl bg-white border border-neutral-200 text-xs" />
+            <input type="hidden" name="preferred_time" value="11:00 AM" />
+            <input type="hidden" name="inspection_type" value="Matched Priority Viewing" />
+            <input type="hidden" name="note" value="Booked via Smart Matcher ({{ item.match_score }}% match)" />
+            <button type="submit" class="btn-lime w-full py-2 text-xs font-bold">
+              Book Priority Viewing →
+            </button>
+          </form>
+
+          <div class="flex items-center gap-2 pt-1">
+            <a href="/properties/{{ prop.id }}" class="flex-1 py-2 rounded-full bg-white border border-neutral-300 text-center text-[11px] font-semibold hover:border-charcoal">
+              Full Details
+            </a>
+            <form action="/transactions/cart/add/{{ prop.id }}" method="post" class="flex-1">
+              <input type="hidden" name="redirect_to" value="/transactions/cart" />
+              <button type="submit" class="w-full py-2 rounded-full bg-charcoal text-white text-[11px] font-semibold hover:bg-neutral-800">
+                + Select
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+

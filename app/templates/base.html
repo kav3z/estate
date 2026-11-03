@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Estate — Revitalize Urban Living{% endblock %}</title>
+  <link rel="icon" type="image/png" href="/static/images/logo.png" />
+
+  <!-- Google Fonts: Plus Jakarta Sans & Playfair Display -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            lime: {
+              DEFAULT: '#C8F169',
+              hover: '#B7E452',
+              soft: '#EEF9D2',
+            },
+            charcoal: '#141517',
+            alabaster: '#F6F7F4',
+            mist: '#EBEDE7',
+          },
+          borderRadius: {
+            '4xl': '2rem',
+            '5xl': '2.5rem',
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/static/css/custom.css" />
+</head>
+<body class="bg-white text-charcoal min-h-screen flex flex-col selection:bg-lime selection:text-charcoal">
+
+  <!-- Floating Pill Navigation Bar (Modeled directly on Reference Image 2) -->
+  <header class="sticky top-3 z-40 px-4 sm:px-8 pt-3 no-print">
+    <nav class="max-w-7xl mx-auto bg-white/95 backdrop-blur-md border border-neutral-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.05)] rounded-full px-4 sm:px-6 py-2.5 flex items-center justify-between gap-4">
+      <!-- Brand Logo -->
+      <a href="/" class="flex items-center gap-2.5 group shrink-0">
+        <img src="/static/images/logo.png" alt="Estate Logo" class="w-9 h-9 rounded-full object-cover border border-neutral-200 group-hover:scale-105 transition" />
+        <div class="flex items-baseline gap-1">
+          <span class="estate-brand text-xl">Estate</span>
+          <span class="text-[10px] font-semibold uppercase tracking-widest px-1.5 py-0.5 rounded bg-lime/50 text-charcoal">NG</span>
+        </div>
+      </a>
+
+      <!-- Center Nav Links -->
+      <div class="hidden lg:flex items-center gap-6 text-sm font-medium text-neutral-700">
+        <a href="/" class="hover:text-charcoal transition">Home</a>
+        <a href="/properties" class="hover:text-charcoal transition">Properties</a>
+        <a href="/matching" class="hover:text-charcoal transition">Smart Match</a>
+        <a href="/neighbourhoods" class="hover:text-charcoal transition">Neighbourhood Intel</a>
+        <a href="/reviews" class="hover:text-charcoal transition">Reviews</a>
+        <a href="/help" class="hover:text-charcoal transition">Help & FAQ</a>
+      </div>
+
+      <!-- Right Action Pills -->
+      <div class="flex items-center gap-2 shrink-0">
+        <!-- Multi-Property Cart Pill -->
+        <a href="/transactions/cart"
+           class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-neutral-300 hover:border-charcoal text-xs font-medium transition bg-white">
+          <svg class="w-4 h-4 text-charcoal" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-4h.01" />
+          </svg>
+          <span class="hidden sm:inline">Selection Tray</span>
+          <span class="bg-lime text-charcoal font-bold px-1.5 py-0.2 rounded-full text-[11px]">{{ cart_count }}</span>
+        </a>
+
+        <!-- Active Role Dashboard Button -->
+        <a href="/dashboard/{{ current_user.role }}"
+           class="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-neutral-300 hover:border-charcoal text-xs font-medium transition">
+          <span>{{ current_user.role | capitalize }} Hub</span>
+        </a>
+
+        <!-- Sign In Pill -->
+        <a href="/auth/login"
+           class="hidden md:inline-flex items-center px-4 py-2 rounded-full border border-neutral-300 hover:border-charcoal text-xs font-semibold transition">
+          Sign In
+        </a>
+
+        <!-- Signature Lime Register Pill -->
+        <a href="/auth/register"
+           class="btn-lime px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold">
+          <span>Register</span>
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
+    </nav>
+
+    <!-- Mobile Secondary Nav -->
+    <div class="flex lg:hidden items-center justify-center gap-3 mt-2 overflow-x-auto py-1.5 px-3 bg-white/90 backdrop-blur rounded-full border border-neutral-200 text-xs font-medium text-neutral-700">
+      <a href="/properties" class="whitespace-nowrap hover:text-charcoal">Properties</a>
+      <span>•</span>
+      <a href="/matching" class="whitespace-nowrap hover:text-charcoal">Match</a>
+      <span>•</span>
+      <a href="/neighbourhoods" class="whitespace-nowrap hover:text-charcoal">Area Intel</a>
+      <span>•</span>
+      <a href="/reviews" class="whitespace-nowrap hover:text-charcoal">Reviews</a>
+      <span>•</span>
+      <a href="/help" class="whitespace-nowrap hover:text-charcoal">FAQ</a>
+      <span>•</span>
+      <a href="/dashboard/{{ current_user.role }}" class="whitespace-nowrap font-bold text-charcoal">{{ current_user.role|capitalize }} Hub</a>
+    </div>
+  </header>
+
+  <!-- Flash Toast Notification -->
+  {% if flash %}
+  <div class="max-w-7xl mx-auto w-full px-4 sm:px-8 mt-4 no-print">
+    <div class="rounded-2xl px-5 py-3.5 flex items-center justify-between gap-4 border shadow-sm
+      {% if flash.kind == 'success' %}bg-lime/25 border-lime text-charcoal
+      {% elif flash.kind == 'warning' %}bg-amber-50 border-amber-300 text-amber-900
+      {% else %}bg-alabaster border-neutral-300 text-charcoal{% endif %}">
+      <div class="flex items-center gap-3 text-sm font-medium">
+        <span class="w-6 h-6 rounded-full bg-charcoal text-lime inline-flex items-center justify-center text-xs font-bold shrink-0">✓</span>
+        <span>{{ flash.title }}</span>
+      </div>
+      <a href="{{ request.url.path }}" class="text-xs font-semibold underline opacity-75 hover:opacity-100">Dismiss</a>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Main Content -->
+  <main class="flex-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Editorial Footer (Modeled on Reference Image 4 bottom bar) -->
+  <footer class="mt-20 border-t border-neutral-200 bg-white no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 py-14">
+      <!-- Top Newsletter & Upgrade Banner -->
+      <div class="bg-alabaster rounded-4xl p-8 sm:p-10 border border-neutral-200/80 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-12">
+        <div class="max-w-xl">
+          <h3 class="text-2xl sm:text-3xl font-normal tracking-tight text-charcoal leading-snug">
+            Upgrade for exclusive benefits. Elevate your living experience today!
+          </h3>
+        </div>
+        <form action="/help/contact" method="post" class="w-full lg:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-white p-1.5 rounded-full border border-neutral-200 shadow-sm">
+          <input type="hidden" name="name" value="{{ current_user.name }}" />
+          <input type="hidden" name="topic" value="VIP Verified Property Alerts" />
+          <input type="hidden" name="message" value="Subscribed to weekly 7-day verified property alerts." />
+          <input type="email" name="email" required placeholder="Enter your email"
+                 class="px-5 py-2.5 text-sm bg-transparent focus:outline-none min-w-[240px]" />
+          <button type="submit" class="btn-lime px-6 py-2.5 text-xs uppercase tracking-wider font-bold">
+            SUBMIT
+          </button>
+        </form>
+      </div>
+
+      <!-- Bottom Nav & Dashboards -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-6 text-sm text-neutral-600">
+        <div class="flex items-center gap-3">
+          <img src="/static/images/logo.png" alt="Estate Logo" class="w-8 h-8 rounded-full border border-neutral-200" />
+          <span class="estate-brand text-lg">Estate</span>
+          <span class="text-xs text-neutral-400">• Verified Housing & Land Platform</span>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-center gap-6 text-xs sm:text-sm font-medium text-neutral-700">
+          <a href="/" class="hover:text-charcoal">Home</a>
+          <a href="/properties" class="hover:text-charcoal">Properties</a>
+          <a href="/matching" class="hover:text-charcoal">Matching</a>
+          <a href="/neighbourhoods" class="hover:text-charcoal">Neighbourhoods</a>
+          <a href="/reviews" class="hover:text-charcoal">Reviews</a>
+          <a href="/help" class="hover:text-charcoal">FAQ & Contact</a>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <a href="/auth/switch/tenant" class="px-3 py-1.5 rounded-full border border-neutral-300 text-xs font-semibold hover:bg-charcoal hover:text-white transition">Tenant View</a>
+          <a href="/auth/switch/landlord" class="px-3 py-1.5 rounded-full border border-neutral-300 text-xs font-semibold hover:bg-charcoal hover:text-white transition">Landlord View</a>
+          <a href="/auth/switch/admin" class="px-3 py-1.5 rounded-full border border-neutral-300 text-xs font-semibold hover:bg-charcoal hover:text-white transition">Admin View</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =====================================================================
+       FLOATING AI CHATBOT CONCIERGE (Bottom-Right of Every Page)
+       ===================================================================== -->
+  <div id="estateChatbotRoot" class="fixed bottom-5 right-5 z-50 no-print">
+    <!-- Chat Window Panel (Hidden by Default) -->
+    <div id="estateChatWindow"
+         class="hidden mb-3 w-[340px] sm:w-[390px] bg-white rounded-3xl border-2 border-charcoal shadow-2xl overflow-hidden flex flex-col">
+      <!-- Header -->
+      <div class="bg-charcoal text-white px-5 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-lime text-charcoal flex items-center justify-center font-extrabold text-sm shadow">
+            ✦
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="estate-brand-dark text-base">Estate</span>
+              <span class="font-bold text-sm text-white">AI Concierge</span>
+            </div>
+            <span class="text-[11px] text-lime flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-lime animate-pulse"></span>
+              Online • Listings, Fees & Support
+            </span>
+          </div>
+        </div>
+        <button type="button" onclick="toggleEstateChatbot()"
+                class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm font-bold transition"
+                title="Minimize Chat">
+          ✕
+        </button>
+      </div>
+
+      <!-- Messages Container -->
+      <div id="estateChatMessages" class="p-4 space-y-3 max-h-[340px] overflow-y-auto bg-alabaster text-xs">
+        <div class="bg-white border border-neutral-200 rounded-2xl rounded-tl-sm p-3.5 text-charcoal shadow-sm leading-relaxed">
+          <p class="font-bold text-charcoal mb-1">Welcome to <span class="estate-brand">Estate</span> AI Support!</p>
+          <p class="text-neutral-600">
+            Ask me anything about our verified houses & land listings, Full Commitment Before Inspection charges, Deal Room price negotiation, neighbourhood power/drainage, or support issues.
+          </p>
+        </div>
+
+        <!-- Quick Suggestion Chips -->
+        <div id="estateChatChips" class="flex flex-wrap gap-1.5 pt-1">
+          <button type="button" onclick="sendEstateQuickPrompt('Show available properties')"
+                  class="px-3 py-1.5 rounded-full bg-white hover:bg-lime border border-neutral-300 text-[11px] font-semibold text-charcoal transition">
+            🏠 Available Properties
+          </button>
+          <button type="button" onclick="sendEstateQuickPrompt('Show serviced land plots')"
+                  class="px-3 py-1.5 rounded-full bg-white hover:bg-lime border border-neutral-300 text-[11px] font-semibold text-charcoal transition">
+            📐 Land Listings
+          </button>
+          <button type="button" onclick="sendEstateQuickPrompt('How do transparent charges & escrow work?')"
+                  class="px-3 py-1.5 rounded-full bg-white hover:bg-lime border border-neutral-300 text-[11px] font-semibold text-charcoal transition">
+            💳 Charges & Escrow
+          </button>
+          <button type="button" onclick="sendEstateQuickPrompt('Check neighbourhood electricity & drainage')"
+                  class="px-3 py-1.5 rounded-full bg-white hover:bg-lime border border-neutral-300 text-[11px] font-semibold text-charcoal transition">
+            ⚡ Area Power & Drainage
+          </button>
+          <button type="button" onclick="sendEstateQuickPrompt('I need help with an issue')"
+                  class="px-3 py-1.5 rounded-full bg-white hover:bg-lime border border-neutral-300 text-[11px] font-semibold text-charcoal transition">
+            🛠️ Help with an Issue
+          </button>
+        </div>
+      </div>
+
+      <!-- Input Form -->
+      <form onsubmit="submitEstateChat(event)" class="p-3 bg-white border-t border-neutral-200 flex items-center gap-2">
+        <input id="estateChatInput" type="text" required
+               placeholder="Ask about listings, prices, land, or issues..."
+               class="flex-1 px-3.5 py-2.5 rounded-full bg-alabaster border border-neutral-200 text-xs text-charcoal focus:outline-none focus:border-charcoal" />
+        <button type="submit"
+                class="w-9 h-9 rounded-full bg-lime hover:bg-lime-hover text-charcoal font-extrabold flex items-center justify-center shrink-0 transition shadow-sm"
+                title="Send Message">
+          →
+        </button>
+      </form>
+    </div>
+
+    <!-- Floating Launcher Pill Button -->
+    <button id="estateChatLauncher" type="button" onclick="toggleEstateChatbot()"
+            class="ml-auto flex items-center gap-2.5 px-5 py-3.5 rounded-full bg-charcoal hover:bg-neutral-800 text-white shadow-[0_12px_30px_rgba(20,21,23,0.3)] border-2 border-lime transition transform hover:scale-105">
+      <span class="w-7 h-7 rounded-full bg-lime text-charcoal font-extrabold text-xs inline-flex items-center justify-center">
+        💬
+      </span>
+      <span class="text-xs sm:text-sm font-bold tracking-tight">
+        Ask <span class="estate-brand-dark">Estate</span> AI
+      </span>
+    </button>
+  </div>
+
+  <script>
+    function toggleEstateChatbot() {
+      const win = document.getElementById('estateChatWindow');
+      const input = document.getElementById('estateChatInput');
+      win.classList.toggle('hidden');
+      if (!win.classList.contains('hidden') && input) {
+        input.focus();
+      }
+    }
+
+    function formatBotReply(text) {
+      return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="underline font-bold text-emerald-800 hover:text-charcoal">$1</a>')
+        .replace(/\n/g, '<br/>');
+    }
+
+    function sendEstateQuickPrompt(promptText) {
+      const input = document.getElementById('estateChatInput');
+      input.value = promptText;
+      submitEstateChat(new Event('submit'));
+    }
+
+    async function submitEstateChat(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const input = document.getElementById('estateChatInput');
+      const container = document.getElementById('estateChatMessages');
+      const message = (input.value || '').trim();
+      if (!message) return;
+
+      // Append user bubble
+      const userBubble = document.createElement('div');
+      userBubble.className = 'bg-charcoal text-white rounded-2xl rounded-tr-sm p-3 ml-8 shadow-sm leading-relaxed';
+      userBubble.textContent = message;
+      container.appendChild(userBubble);
+      input.value = '';
+      container.scrollTop = container.scrollHeight;
+
+      try {
+        const res = await fetch('/api/chatbot', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+        });
+        const data = await res.json();
+
+        const botBubble = document.createElement('div');
+        botBubble.className = 'bg-white border border-neutral-200 rounded-2xl rounded-tl-sm p-3.5 mr-4 text-charcoal shadow-sm leading-relaxed';
+        botBubble.innerHTML = formatBotReply(data.reply || 'How else can I help you today?');
+        container.appendChild(botBubble);
+
+        if (Array.isArray(data.suggestions) && data.suggestions.length > 0) {
+          const chipsWrap = document.createElement('div');
+          chipsWrap.className = 'flex flex-wrap gap-1.5 pt-1';
+          data.suggestions.forEach(s => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'px-2.5 py-1 rounded-full bg-lime/40 hover:bg-lime border border-lime text-[11px] font-semibold text-charcoal transition';
+            btn.textContent = s;
+            btn.onclick = () => sendEstateQuickPrompt(s);
+            chipsWrap.appendChild(btn);
+          });
+          container.appendChild(chipsWrap);
+        }
+        container.scrollTop = container.scrollHeight;
+      } catch (err) {
+        const errBubble = document.createElement('div');
+        errBubble.className = 'bg-rose-50 border border-rose-200 rounded-2xl p-3 text-rose-800';
+        errBubble.textContent = 'Connection error. Please try again or visit our Help & FAQ page.';
+        container.appendChild(errBubble);
+      }
+    }
+  </script>
+
+</body>
+</html>

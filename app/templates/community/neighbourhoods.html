@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% block title %}Neighbourhood Intelligence & Verified Resident Feedback — Estate{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto px-4 sm:px-8 py-10">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl sm:text-5xl font-normal tracking-tight text-charcoal">
+      Neighbourhood Intelligence & Resident Reports
+    </h1>
+    <p class="text-sm text-neutral-500 mt-2 max-w-2xl">
+      Real-world telemetry on electricity (daily Band-A & estate IPP hours), water quality, flood drainage, road paving, and security — enriched with feedback from verified residents living in each area.
+    </p>
+  </div>
+
+  <!-- Area Selector Pills -->
+  <div class="flex flex-wrap gap-2.5 mb-8">
+    {% for nb in neighbourhoods %}
+    <a href="/neighbourhoods?area={{ nb.key }}"
+       class="px-4 py-2.5 rounded-full text-xs font-bold transition border
+       {% if nb.key == selected_key %}bg-lime text-charcoal border-charcoal shadow-sm{% else %}bg-alabaster text-neutral-600 border-neutral-200 hover:border-charcoal{% endif %}">
+      {{ nb.name }} (⚡ {{ nb.electricity_hours }}h)
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- Selected Neighbourhood Deep Dive Card -->
+  <div class="bento-card p-6 sm:p-10 bg-alabaster mb-12">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      <div class="lg:col-span-5 relative h-72 sm:h-80 rounded-3xl overflow-hidden border border-neutral-200">
+        <img src="{{ selected_area.image }}" alt="{{ selected_area.name }}" class="w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent p-6 flex flex-col justify-between">
+          <span class="self-start bg-lime text-charcoal text-xs font-extrabold px-3.5 py-1 rounded-full">
+            ⚡ {{ selected_area.electricity_hours }} hrs / day Avg Power
+          </span>
+          <div class="text-white">
+            <h2 class="text-2xl font-bold">{{ selected_area.name }}</h2>
+            <p class="text-xs text-white/85 mt-1">{{ selected_area.tagline }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5-Pillar Infrastructure Breakdown -->
+      <div class="lg:col-span-7 space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="bg-white rounded-3xl p-5 border border-neutral-200">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-xs font-bold text-charcoal">Electricity Supply</span>
+              <span class="bg-lime text-charcoal text-xs font-extrabold px-2.5 py-0.5 rounded-full">
+                {{ selected_area.electricity_hours }}h / 24h
+              </span>
+            </div>
+            <p class="text-xs text-neutral-600">{{ selected_area.electricity_note }}</p>
+          </div>
+
+          <div class="bg-white rounded-3xl p-5 border border-neutral-200">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-xs font-bold text-charcoal">Water Treatment</span>
+              <span class="bg-alabaster text-charcoal text-xs font-extrabold px-2.5 py-0.5 rounded-full">
+                {{ selected_area.water_rating }}
+              </span>
+            </div>
+            <p class="text-xs text-neutral-600">{{ selected_area.water_note }}</p>
+          </div>
+
+          <div class="bg-white rounded-3xl p-5 border border-neutral-200">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-xs font-bold text-charcoal">Drainage & Flood Score</span>
+              <span class="bg-alabaster text-charcoal text-xs font-extrabold px-2.5 py-0.5 rounded-full">
+                {{ selected_area.drainage_rating }}
+              </span>
+            </div>
+            <p class="text-xs text-neutral-600">{{ selected_area.drainage_note }}</p>
+          </div>
+
+          <div class="bg-white rounded-3xl p-5 border border-neutral-200">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-xs font-bold text-charcoal">Roads & Access</span>
+              <span class="bg-alabaster text-charcoal text-xs font-extrabold px-2.5 py-0.5 rounded-full">
+                {{ selected_area.roads_rating }}
+              </span>
+            </div>
+            <p class="text-xs text-neutral-600">{{ selected_area.roads_note }}</p>
+          </div>
+        </div>
+
+        <!-- Security Banner -->
+        <div class="bg-charcoal text-white rounded-3xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <span class="text-xs font-bold text-lime uppercase tracking-wider">Verified Security Architecture ({{ selected_area.security_rating }})</span>
+            <p class="text-xs text-white/85 mt-1">{{ selected_area.security_note }}</p>
+          </div>
+          <div class="text-right shrink-0">
+            <span class="text-[10px] text-white/60 block">Typical 2-Bed / 4-Bed Rent</span>
+            <span class="text-xs font-bold text-lime">{{ selected_area.avg_rent_2bed | naira_compact }} – {{ selected_area.avg_rent_4bed | naira_compact }}/yr</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resident Feedback & Submit Form Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <!-- Left 7 Columns: Verified Resident Reports -->
+    <div class="lg:col-span-7 space-y-5">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-bold text-charcoal">
+          Verified Resident Feedback ({{ all_feedback | length }})
+        </h3>
+        <span class="text-xs bg-lime/50 text-charcoal font-bold px-3 py-1 rounded-full">
+          Utility Bill / Tenancy Verified
+        </span>
+      </div>
+
+      {% for fb in all_feedback %}
+      <div class="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div>
+            <span class="font-bold text-sm text-charcoal">{{ fb.resident_name }}</span>
+            <span class="text-xs text-neutral-500 ml-1">• {{ fb.residency_duration }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="bg-alabaster border border-neutral-200 text-charcoal text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+              {{ fb.neighbourhood_key | replace('-', ' ') | title }}
+            </span>
+            <span class="bg-lime text-charcoal text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+              ✓ {{ fb.verification_badge }}
+            </span>
+          </div>
+        </div>
+
+        <p class="text-xs sm:text-sm text-neutral-700 leading-relaxed mb-4">"{{ fb.comment }}"</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] bg-alabaster p-3 rounded-2xl border border-neutral-200/70">
+          <div>
+            <span class="text-neutral-400 block">Electricity</span>
+            <span class="font-bold text-charcoal">⚡ {{ fb.power_report }}</span>
+          </div>
+          <div>
+            <span class="text-neutral-400 block">Water</span>
+            <span class="font-bold text-charcoal">💧 {{ fb.water_report }}</span>
+          </div>
+          <div>
+            <span class="text-neutral-400 block">Drainage</span>
+            <span class="font-bold text-charcoal">🌊 {{ fb.drainage_report }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Right 5 Columns: Submit Verified Resident Feedback Form -->
+    <div class="lg:col-span-5 rounded-4xl border-2 border-charcoal bg-white p-6 sm:p-8 shadow-lg sticky top-24">
+      <span class="bg-lime text-charcoal text-[11px] font-extrabold px-3 py-1 rounded-full">
+        Resident Intelligence Portal
+      </span>
+      <h3 class="text-xl font-bold text-charcoal mt-2">Live in one of these areas?</h3>
+      <p class="text-xs text-neutral-500 mt-1 mb-5">
+        Share honest feedback on electricity, water, drainage, roads, and security to guide prospective tenants.
+      </p>
+
+      <form action="/neighbourhoods/feedback" method="post" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-bold text-neutral-700 mb-1">Select Your Neighbourhood</label>
+          <select name="neighbourhood_key" class="w-full px-3.5 py-2.5 rounded-xl bg-alabaster border border-neutral-200 font-semibold">
+            {% for nb in neighbourhoods %}
+            <option value="{{ nb.key }}" {% if nb.key == selected_key %}selected{% endif %}>{{ nb.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-neutral-700 mb-1">Your Name</label>
+            <input type="text" name="resident_name" value="{{ current_user.name }}" required
+                   class="w-full px-3 py-2 rounded-xl bg-alabaster border border-neutral-200 font-semibold" />
+          </div>
+          <div>
+            <label class="block font-bold text-neutral-700 mb-1">Residency Duration</label>
+            <input type="text" name="residency_duration" value="3 Years Verified Resident" required
+                   class="w-full px-3 py-2 rounded-xl bg-alabaster border border-neutral-200 font-semibold" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block font-bold text-neutral-700 mb-1">Power Hrs/Day</label>
+            <input type="text" name="power_report" value="21 hrs/day avg" required
+                   class="w-full px-2.5 py-2 rounded-xl bg-alabaster border border-neutral-200" />
+          </div>
+          <div>
+            <label class="block font-bold text-neutral-700 mb-1">Water Status</label>
+            <input type="text" name="water_report" value="Clean Borehole" required
+                   class="w-full px-2.5 py-2 rounded-xl bg-alabaster border border-neutral-200" />
+          </div>
+          <div>
+            <label class="block font-bold text-neutral-700 mb-1">Drainage</label>
+            <input type="text" name="drainage_report" value="Flood-Free" required
+                   class="w-full px-2.5 py-2 rounded-xl bg-alabaster border border-neutral-200" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-neutral-700 mb-1">Detailed Area Experience (Roads, Security, Noise)</label>
+          <textarea name="comment" rows="3" required placeholder="How is power stability, rainy season drainage, and night security?"
+                    class="w-full px-3.5 py-2 rounded-xl bg-alabaster border border-neutral-200"></textarea>
+        </div>
+
+        <button type="submit" class="btn-lime w-full py-3 text-xs font-extrabold">
+          Publish Verified Resident Report →
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
+

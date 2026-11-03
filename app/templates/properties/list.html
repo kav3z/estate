@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+{% block title %}Verified Property & Land Listings — Estate{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto px-4 sm:px-8 py-10">
+  <!-- Header Row -->
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+    <div>
+      <h1 class="text-3xl sm:text-5xl font-normal tracking-tight text-charcoal">
+        Homes & land available for your dreams
+      </h1>
+      <p class="text-sm text-neutral-500 mt-2 max-w-2xl">
+        Every listing is backed by upfront transparent Naira cost breakdowns,
+        verified advertiser authority, and a 7-day landlord reconfirmation timer.
+      </p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2.5">
+      <div class="bg-alabaster border border-neutral-200 rounded-full px-4 py-2 text-xs font-medium text-neutral-700">
+        {{ counts.houses }} Houses • {{ counts.apartments }} Apartments • {{ counts.lands }} Land Plots
+      </div>
+      <a href="/transactions/cart" class="btn-lime px-5 py-2.5 text-xs">
+        <span>Checkout Tray ({{ cart_count }})</span>
+        <span>→</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Filter Pill Bar -->
+  <form action="/properties" method="get"
+        class="bento-card p-4 sm:p-5 bg-alabaster mb-10 flex flex-wrap items-end gap-4">
+    <div class="flex-1 min-w-[140px]">
+      <label class="block text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1">Category</label>
+      <select name="category" class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-neutral-200 text-xs font-semibold">
+        <option value="All" {% if filters.category == 'All' %}selected{% endif %}>All (Rent & Buy)</option>
+        <option value="Rent" {% if filters.category == 'Rent' %}selected{% endif %}>Rent Only</option>
+        <option value="Buy" {% if filters.category == 'Buy' %}selected{% endif %}>Outright Buy</option>
+      </select>
+    </div>
+
+    <div class="flex-1 min-w-[150px]">
+      <label class="block text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1">Property Type</label>
+      <select name="property_type" class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-neutral-200 text-xs font-semibold">
+        <option value="All" {% if filters.property_type == 'All' %}selected{% endif %}>All Types</option>
+        <option value="Duplex" {% if filters.property_type == 'Duplex' %}selected{% endif %}>Duplex</option>
+        <option value="Bungalow" {% if filters.property_type == 'Bungalow' %}selected{% endif %}>Bungalow</option>
+        <option value="Apartment" {% if filters.property_type == 'Apartment' %}selected{% endif %}>Apartment</option>
+        <option value="Land" {% if filters.property_type == 'Land' %}selected{% endif %}>Serviced Land</option>
+      </select>
+    </div>
+
+    <div class="flex-1 min-w-[160px]">
+      <label class="block text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1">Location</label>
+      <input type="text" name="location" value="{% if filters.location != 'All' %}{{ filters.location }}{% endif %}"
+             placeholder="Lekki, Ikoyi, Ikeja, Abuja..."
+             class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-neutral-200 text-xs font-semibold focus:outline-none" />
+    </div>
+
+    <div class="flex items-center gap-4 px-2 py-2">
+      <label class="inline-flex items-center gap-2 text-xs font-semibold text-charcoal cursor-pointer">
+        <input type="checkbox" name="verified_only" value="true" {% if filters.verified_only %}checked{% endif %} class="rounded accent-charcoal" />
+        <span>Verified Only</span>
+      </label>
+      <label class="inline-flex items-center gap-2 text-xs font-semibold text-charcoal cursor-pointer">
+        <input type="checkbox" name="available_only" value="true" {% if filters.available_only %}checked{% endif %} class="rounded accent-charcoal" />
+        <span>Available Only</span>
+      </label>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button type="submit" class="btn-lime px-6 py-2.5 text-xs font-bold">
+        Apply Filters →
+      </button>
+      <a href="/properties" class="px-4 py-2.5 rounded-full bg-white border border-neutral-200 text-xs font-semibold hover:border-charcoal">
+        Reset
+      </a>
+    </div>
+  </form>
+
+  <!-- Listings Grid -->
+  {% if properties %}
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+    {% for prop in properties %}
+    <div class="rounded-4xl border border-neutral-200/90 bg-white p-4 flex flex-col justify-between hover:shadow-xl transition group">
+      <div>
+        <!-- Image Header with Top-Left Lime Price Badge -->
+        <div class="relative h-64 rounded-3xl overflow-hidden mb-4">
+          <img src="{{ prop.image_url }}" alt="{{ prop.title }}"
+               class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20"></div>
+
+          <!-- Top Badges -->
+          <div class="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between gap-2">
+            <span class="bg-lime text-charcoal font-extrabold text-xs px-3.5 py-1.5 rounded-full shadow">
+              {{ prop.base_price | naira }}{% if prop.category == 'Rent' %}/yr{% endif %}
+            </span>
+            {% if prop.is_verified %}
+            <span class="bg-white/95 backdrop-blur text-charcoal text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
+              <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+              {{ prop.verification_code }}
+            </span>
+            {% else %}
+            <span class="bg-amber-100 text-amber-900 text-[11px] font-bold px-3 py-1 rounded-full">
+              Pending Audit
+            </span>
+            {% endif %}
+          </div>
+
+          <!-- Bottom Status & 7-Day Availability Reconfirmation Badge -->
+          <div class="absolute bottom-3.5 left-3.5 right-3.5 flex items-center justify-between gap-2">
+            {% if prop.status == 'Available' %}
+            <span class="bg-charcoal/85 backdrop-blur text-white text-[11px] font-medium px-3 py-1 rounded-full">
+              ✓ Available • Confirmed {{ prop.days_since_confirmed }}d ago ({{ prop.days_until_reconfirmation_due }}d left)
+            </span>
+            {% else %}
+            <span class="bg-rose-600 text-white text-[11px] font-bold px-3 py-1 rounded-full">
+              ✕ Unavailable (Rented / Sold)
+            </span>
+            {% endif %}
+
+            <a href="/properties/{{ prop.id }}" class="circle-arrow-btn bg-white text-charcoal shadow-md">↗</a>
+          </div>
+        </div>
+
+        <!-- Metadata & Specs -->
+        <div class="px-1">
+          <div class="flex items-center justify-between text-xs text-neutral-500 mb-1">
+            <span class="font-medium">{{ prop.category }} • {{ prop.property_type }} • {{ prop.authority_role }}</span>
+            {% if prop.is_negotiable %}
+            <span class="bg-lime/50 text-charcoal font-bold px-2.5 py-0.5 rounded-full text-[11px]">Negotiable</span>
+            {% else %}
+            <span class="bg-alabaster text-neutral-600 font-medium px-2.5 py-0.5 rounded-full text-[11px]">Fixed Price</span>
+            {% endif %}
+          </div>
+
+          <a href="/properties/{{ prop.id }}" class="text-lg font-bold text-charcoal hover:underline block">
+            {{ prop.title }}
+          </a>
+          <p class="text-xs text-neutral-500 mt-0.5">📍 {{ prop.location }} ({{ prop.address_hint }})</p>
+
+          <!-- Specs Bar (Adapts automatically for Land vs House/Apartment) -->
+          {% if prop.property_type == 'Land' %}
+          <div class="grid grid-cols-3 gap-2 my-3.5 bg-alabaster p-2.5 rounded-2xl text-center text-xs border border-neutral-200/60">
+            <div>
+              <span class="font-bold text-charcoal block">{{ prop.size_sqm }} m²</span>
+              <span class="text-[10px] text-neutral-400">Plot Area</span>
+            </div>
+            <div>
+              <span class="font-bold text-charcoal block">100% Dry</span>
+              <span class="text-[10px] text-neutral-400">Topography</span>
+            </div>
+            <div>
+              <span class="font-bold text-charcoal block">⚡ {{ prop.power_hours_per_day }}h</span>
+              <span class="text-[10px] text-neutral-400">Zone Power</span>
+            </div>
+          </div>
+          {% else %}
+          <div class="grid grid-cols-4 gap-2 my-3.5 bg-alabaster p-2.5 rounded-2xl text-center text-xs border border-neutral-200/60">
+            <div>
+              <span class="font-bold text-charcoal block">{{ prop.size_sqm }} m²</span>
+              <span class="text-[10px] text-neutral-400">Area</span>
+            </div>
+            <div>
+              <span class="font-bold text-charcoal block">{{ prop.bedrooms }}</span>
+              <span class="text-[10px] text-neutral-400">Beds</span>
+            </div>
+            <div>
+              <span class="font-bold text-charcoal block">{{ prop.bathrooms }}</span>
+              <span class="text-[10px] text-neutral-400">Baths</span>
+            </div>
+            <div>
+              <span class="font-bold text-charcoal block">⚡ {{ prop.power_hours_per_day }}h</span>
+              <span class="text-[10px] text-neutral-400">Power</span>
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- 02 Transparent Cost Summary Box -->
+          <div class="bg-white rounded-2xl p-3 border border-neutral-200/80 text-xs space-y-1">
+            <div class="flex justify-between text-neutral-500">
+              <span>Stated {{ 'Annual Rent' if prop.category == 'Rent' else 'Sale Price' }}:</span>
+              <span class="font-semibold text-charcoal">{{ prop.base_price | naira }}</span>
+            </div>
+            <div class="flex justify-between text-neutral-500">
+              <span>Upfront Statutory & Service Fees:</span>
+              <span class="font-semibold text-charcoal">+ {{ prop.additional_charges_total | naira }}</span>
+            </div>
+            <div class="flex justify-between font-bold text-charcoal pt-1 border-t border-neutral-100">
+              <span>Full Commitment Before Inspection:</span>
+              <span class="text-emerald-800">{{ prop.total_initial_commitment | naira }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons Row -->
+      <div class="mt-4 pt-3 border-t border-neutral-100 flex items-center gap-2">
+        <a href="/properties/{{ prop.id }}"
+           class="flex-1 py-2.5 px-3 rounded-full bg-charcoal text-white text-xs font-semibold text-center hover:bg-neutral-800 transition">
+          Inspect & Full Breakdown
+        </a>
+
+        {% if prop.status == 'Available' %}
+          {% if prop.is_negotiable %}
+          <a href="/transactions/negotiate/{{ prop.id }}"
+             class="py-2.5 px-3.5 rounded-full bg-alabaster hover:bg-lime text-charcoal border border-neutral-300 text-xs font-bold transition"
+             title="Negotiate in Deal Room">
+            Negotiate
+          </a>
+          {% endif %}
+
+          <form action="/transactions/cart/add/{{ prop.id }}" method="post">
+            <input type="hidden" name="redirect_to" value="/properties" />
+            <button type="submit"
+                    class="py-2.5 px-3.5 rounded-full {% if prop.id in cart_ids %}bg-lime text-charcoal{% else %}bg-lime/70 hover:bg-lime text-charcoal{% endif %} text-xs font-bold transition">
+              {% if prop.id in cart_ids %}✓ In Tray{% else %}+ Select{% endif %}
+            </button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="bento-card p-12 text-center">
+    <h3 class="text-xl font-bold text-charcoal mb-2">No properties matched your filter criteria</h3>
+    <p class="text-xs text-neutral-500 mb-5">Try clearing your filters or using the Smart Property Matcher.</p>
+    <a href="/properties" class="btn-lime px-6 py-3 text-xs font-bold">Reset All Filters →</a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}
+

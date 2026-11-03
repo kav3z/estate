@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard — Verification Audit, 7-Day Enforcement & Accountability | Estate{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto px-4 sm:px-8 py-10">
+  <!-- Admin Header Banner -->
+  <div class="rounded-4xl bg-charcoal text-white p-6 sm:p-10 mb-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+    <div class="flex items-center gap-4">
+      <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80"
+           alt="Admin Avatar"
+           class="w-16 h-16 rounded-full object-cover border-2 border-lime" />
+      <div>
+        <div class="flex flex-wrap items-center gap-2 mb-1">
+          <span class="bg-lime text-charcoal text-xs font-extrabold px-3 py-0.5 rounded-full">
+            SITE OWNER / ADMIN CONTROL CENTER
+          </span>
+          <span class="text-xs text-white/80 font-medium">Trust, Anti-Fraud & Escrow Oversight</span>
+        </div>
+        <h1 class="text-2xl sm:text-4xl font-bold tracking-tight">Amara Obi (<span class="estate-brand-dark">Estate</span> Admin)</h1>
+        <p class="text-xs sm:text-sm text-white/70 mt-0.5">
+          Audit property authority, enforce 7-day availability updates, and resolve Landlord & Tenant accountability disputes.
+        </p>
+      </div>
+    </div>
+
+    <!-- KPI Pills -->
+    <div class="grid grid-cols-3 gap-3 text-center">
+      <div class="bg-white/10 rounded-2xl px-4 py-2.5 border border-white/15">
+        <span class="text-xl font-extrabold text-lime block">{{ properties | length }}</span>
+        <span class="text-[10px] text-white/70 uppercase">Total Listings</span>
+      </div>
+      <div class="bg-white/10 rounded-2xl px-4 py-2.5 border border-white/15">
+        <span class="text-xl font-extrabold text-lime block">{{ verified_count }}</span>
+        <span class="text-[10px] text-white/70 uppercase">Verified</span>
+      </div>
+      <div class="bg-white/10 rounded-2xl px-4 py-2.5 border border-white/15">
+        <span class="text-xl font-extrabold text-lime block">{{ complaints | length }}</span>
+        <span class="text-[10px] text-white/70 uppercase">Cases</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       1. VERIFIED PROPERTY LISTINGS & AUTHORITY AUDIT TABLE
+       =================================================================== -->
+  <div class="bento-card p-6 sm:p-8 bg-alabaster mb-12">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+      <div>
+        <h2 class="text-2xl font-bold text-charcoal">
+          Property Verification & Anti-Fraud Authority Ledger
+        </h2>
+        <p class="text-xs text-neutral-500 mt-1">
+          Prevent fake advertisements by confirming C of O / Governor's Consent and Direct Landlord or Mandated Agent authority. Click to verify or revoke any listing.
+        </p>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto bg-white rounded-3xl border border-neutral-200">
+      <table class="w-full text-left text-xs">
+        <thead class="bg-alabaster border-b border-neutral-200 text-neutral-500 uppercase text-[10px] tracking-wider">
+          <tr>
+            <th class="py-3.5 px-4">Code / Property</th>
+            <th class="py-3.5 px-4">Advertiser & Authority Proof</th>
+            <th class="py-3.5 px-4">Full Commitment</th>
+            <th class="py-3.5 px-4">7-Day Status</th>
+            <th class="py-3.5 px-4 text-right">Admin Controls</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-neutral-100">
+          {% for prop in properties %}
+          <tr class="hover:bg-alabaster/50 transition">
+            <td class="py-4 px-4">
+              <div class="flex items-center gap-3">
+                <img src="{{ prop.image_url }}" alt="{{ prop.title }}" class="w-12 h-12 rounded-xl object-cover shrink-0" />
+                <div>
+                  <span class="font-mono text-[10px] font-bold text-neutral-400 block">{{ prop.verification_code }}</span>
+                  <a href="/properties/{{ prop.id }}" class="font-bold text-charcoal hover:underline text-xs sm:text-sm">
+                    {{ prop.title }}
+                  </a>
+                  <span class="block text-[11px] text-neutral-500">{{ prop.category }} • {{ prop.property_type }} • {{ prop.location }}</span>
+                </div>
+              </div>
+            </td>
+
+            <td class="py-4 px-4">
+              <span class="font-bold text-charcoal block">{{ prop.landlord_name }} ({{ prop.authority_role }})</span>
+              <span class="text-[11px] text-neutral-500 block">{{ prop.authority_document }}</span>
+              {% if prop.is_verified %}
+              <span class="inline-block mt-1 bg-lime text-charcoal font-extrabold px-2.5 py-0.5 rounded-full text-[10px]">
+                🛡️ Verified Genuine Ad
+              </span>
+              {% else %}
+              <span class="inline-block mt-1 bg-rose-100 text-rose-800 font-extrabold px-2.5 py-0.5 rounded-full text-[10px]">
+                ⚠️ Unverified / Flagged
+              </span>
+              {% endif %}
+            </td>
+
+            <td class="py-4 px-4">
+              <span class="font-extrabold text-charcoal block">{{ prop.total_initial_commitment | naira }}</span>
+              <span class="text-[11px] text-neutral-400">Base: {{ prop.base_price | naira }}</span>
+            </td>
+
+            <td class="py-4 px-4">
+              {% if prop.status == 'Available' %}
+              <span class="bg-emerald-100 text-emerald-900 font-bold px-2.5 py-0.5 rounded-full text-[10px]">
+                Available ({{ prop.days_until_reconfirmation_due }}d left)
+              </span>
+              {% else %}
+              <span class="bg-rose-600 text-white font-bold px-2.5 py-0.5 rounded-full text-[10px]">
+                Unavailable
+              </span>
+              {% endif %}
+            </td>
+
+            <td class="py-4 px-4 text-right">
+              <div class="inline-flex items-center gap-1.5">
+                <form action="/properties/{{ prop.id }}/toggle-verify" method="post">
+                  <button type="submit"
+                          class="px-3 py-1.5 rounded-full font-bold text-[11px] transition
+                          {% if prop.is_verified %}bg-alabaster hover:bg-rose-100 text-charcoal border border-neutral-300{% else %}bg-lime text-charcoal{% endif %}">
+                    {% if prop.is_verified %}Revoke Shield{% else %}✓ Approve & Verify{% endif %}
+                  </button>
+                </form>
+
+                <form action="/properties/{{ prop.id }}/toggle-status" method="post">
+                  <button type="submit" class="px-3 py-1.5 rounded-full bg-charcoal text-white font-semibold text-[11px]">
+                    Toggle Status
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       2. 05 LANDLORD & TENANT ACCOUNTABILITY RESOLUTION CENTER
+       =================================================================== -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <div class="lg:col-span-8 bento-card p-6 sm:p-8 bg-white">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <h2 class="text-2xl font-bold text-charcoal">
+            Landlord & Tenant Complaint Resolution System
+          </h2>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        {% for cmp in complaints %}
+        <div class="rounded-3xl border border-neutral-200 bg-alabaster p-5 text-xs">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <div>
+              <span class="font-mono font-bold text-charcoal">{{ cmp.id }}</span>
+              <span class="font-bold text-charcoal ml-1">• {{ cmp.category }}</span>
+              <span class="text-neutral-500 ml-1">({{ cmp.filed_by_name }} [{{ cmp.filed_by_role }}] vs {{ cmp.against_name }} [{{ cmp.against_role }}])</span>
+            </div>
+            <span class="px-3 py-0.5 rounded-full font-extrabold text-[10px]
+              {% if cmp.status == 'Resolved' %}bg-lime text-charcoal{% else %}bg-amber-200 text-amber-900{% endif %}">
+              {{ cmp.status }}
+            </span>
+          </div>
+
+          <p class="text-neutral-700 mb-2">{{ cmp.description }}</p>
+          <p class="text-[11px] font-semibold text-emerald-800 mb-3">
+            Audit Note: {{ cmp.resolution_note }} ({{ cmp.reputation_impact }})
+          </p>
+
+          {% if cmp.status != 'Resolved' %}
+          <form action="/dashboard/admin/complaints/{{ cmp.id }}/resolve" method="post" class="flex flex-col sm:flex-row gap-2 pt-2 border-t border-neutral-200">
+            <input type="text" name="resolution_note" required
+                   value="Compliance verified evidence from both parties; resolved under Estate Accountability Charter."
+                   class="flex-1 px-3 py-1.5 rounded-xl bg-white border border-neutral-300" />
+            <button type="submit" class="btn-lime px-4 py-1.5 text-xs font-extrabold shrink-0">
+              ✓ Resolve Case
+            </button>
+          </form>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Right 4 Columns: Registered Platform Personas & Escrow Volume -->
+    <div class="lg:col-span-4 space-y-6">
+      <div class="bento-card p-6 bg-alabaster">
+        <h3 class="text-base font-bold text-charcoal mb-3">Verified Platform Directory ({{ users | length }})</h3>
+        <div class="space-y-3">
+          {% for u in users %}
+          <div class="bg-white rounded-2xl p-3.5 border border-neutral-200 flex items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2.5">
+              <img src="{{ u.avatar }}" alt="{{ u.name }}" class="w-9 h-9 rounded-full object-cover" />
+              <div>
+                <p class="font-bold text-charcoal">{{ u.name }}</p>
+                <p class="text-[11px] text-neutral-500">{{ u.role | capitalize }} • {{ u.verified_identity }}</p>
+              </div>
+            </div>
+            <span class="bg-lime text-charcoal font-extrabold px-2 py-0.5 rounded-full text-[11px]">
+              {{ u.reputation_score }}★
+            </span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="rounded-3xl bg-charcoal text-white p-6 text-xs space-y-2">
+        <span class="text-lime font-bold uppercase tracking-wider">Escrow Settlement Ledger</span>
+        <h4 class="text-lg font-bold">{{ transactions | length }} Completed Transactions</h4>
+        <p class="text-white/75">
+          Every completed checkout automatically transitions the property status to <strong>Unavailable</strong> and unlocks verified buyer reviews on the Tenant Dashboard.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+

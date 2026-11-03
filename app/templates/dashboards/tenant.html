@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+{% block title %}Tenant Dashboard — My Properties, Reviews, Deal Room & Accountability | Estate{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto px-4 sm:px-8 py-10">
+  <!-- Tenant Header Banner -->
+  <div class="rounded-4xl bg-charcoal text-white p-6 sm:p-10 mb-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+    <div class="flex items-center gap-4">
+      <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"
+           alt="Tenant Avatar"
+           class="w-16 h-16 rounded-full object-cover border-2 border-lime" />
+      <div>
+        <div class="flex flex-wrap items-center gap-2 mb-1">
+          <span class="bg-lime text-charcoal text-xs font-extrabold px-3 py-0.5 rounded-full">
+            TENANT & BUYER DASHBOARD
+          </span>
+          <span class="text-xs text-white/80 font-medium">NIN & BVN Verified • ★ 4.95 Accountability Score</span>
+        </div>
+        <h1 class="text-2xl sm:text-4xl font-bold tracking-tight">Welcome, Chidi Nwosu</h1>
+        <p class="text-xs sm:text-sm text-white/70 mt-0.5">
+          Manage your rented/purchased properties, submit property & platform reviews, track Deal Room negotiations, and coordinate inspections.
+        </p>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2.5">
+      <a href="/matching" class="btn-lime px-5 py-2.5 text-xs font-extrabold">
+        Smart Property Matcher →
+      </a>
+      <a href="/transactions/cart" class="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition">
+        Checkout Tray ({{ cart_count }})
+      </a>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       1. MY PURCHASED & RENTED PROPERTIES + FEEDBACK & REVIEWS
+       (Explicit User Requirement: "make all feedback and reviews of all the
+        properties they've bought or rented from the site on their dashboard")
+       =================================================================== -->
+  <div class="mb-12">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+      <div>
+        <h2 class="text-2xl sm:text-3xl font-bold text-charcoal">
+          Properties You Have Bought or Rented on <span class="estate-brand">Estate</span> ({{ rented_or_bought | length }})
+        </h2>
+        <p class="text-xs text-neutral-500 mt-1">
+          Write or update your verified feedback and star rating for every house or land plot you have acquired through <span class="estate-brand">Estate</span>.
+        </p>
+      </div>
+      <a href="/properties" class="btn-outline-pill px-4 py-2 text-xs self-start sm:self-auto">
+        + Acquire Another Property
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {% for item in rented_or_bought %}
+      <div class="rounded-4xl border-2 border-neutral-200 bg-white p-6 shadow-sm flex flex-col justify-between">
+        <div>
+          <div class="flex items-start justify-between gap-4 mb-4">
+            <div class="flex items-center gap-3.5">
+              <img src="{{ item.property_image }}" alt="{{ item.property_title }}" class="w-20 h-20 rounded-2xl object-cover border border-neutral-200 shrink-0" />
+              <div>
+                <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                  <span class="bg-lime text-charcoal text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">
+                    {{ item.category | upper }} COMPLETED
+                  </span>
+                  <span class="font-mono text-[11px] text-neutral-400">{{ item.transaction_id }}</span>
+                </div>
+                <a href="/properties/{{ item.property_id }}" class="text-base sm:text-lg font-bold text-charcoal hover:underline block">
+                  {{ item.property_title }}
+                </a>
+                <p class="text-xs text-neutral-500">📍 {{ item.property_location }} • Landlord: {{ item.landlord_name }}</p>
+              </div>
+            </div>
+
+            <div class="text-right shrink-0">
+              <span class="text-[10px] text-neutral-400 block">Settled Escrow</span>
+              <span class="text-sm font-extrabold text-charcoal">{{ item.amount_paid | naira }}</span>
+              <span class="text-[10px] text-neutral-400 block">{{ item.date_completed }}</span>
+            </div>
+          </div>
+
+          <!-- Current Published Feedback Display -->
+          {% if item.my_property_review %}
+          <div class="bg-alabaster rounded-2xl p-4 border border-neutral-200 mb-4 text-xs">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-bold text-charcoal">Your Published Property Review:</span>
+              <span class="bg-lime text-charcoal font-extrabold px-2.5 py-0.5 rounded-full">
+                {{ "★" * item.my_property_rating }} ({{ item.my_property_rating }}/5)
+              </span>
+            </div>
+            <p class="text-neutral-700 italic">"{{ item.my_property_review }}"</p>
+          </div>
+          {% else %}
+          <div class="bg-amber-50 rounded-2xl p-3.5 border border-amber-200 mb-4 text-xs text-amber-900 font-medium">
+            ✦ Newly checked out! Share your feedback and rating for this property below.
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Inline Form to Submit / Update Review for This Bought/Rented Property -->
+        <form action="/dashboard/tenant/property-review" method="post" class="pt-3 border-t border-neutral-100 space-y-2.5 text-xs">
+          <input type="hidden" name="transaction_id" value="{{ item.transaction_id }}" />
+          <div class="flex items-center justify-between gap-2">
+            <label class="font-bold text-charcoal">
+              {% if item.my_property_review %}Update Your Feedback & Rating:{% else %}Post Verified Property Review:{% endif %}
+            </label>
+            <select name="rating" class="px-3 py-1 rounded-xl bg-alabaster border border-neutral-200 font-bold text-charcoal">
+              <option value="5" {% if item.my_property_rating == 5 %}selected{% endif %}>★★★★★ (5/5)</option>
+              <option value="4" {% if item.my_property_rating == 4 %}selected{% endif %}>★★★★☆ (4/5)</option>
+              <option value="3" {% if item.my_property_rating == 3 %}selected{% endif %}>★★★☆☆ (3/5)</option>
+            </select>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input type="text" name="review_text" required
+                   value="{{ item.my_property_review }}"
+                   placeholder="How was the handover, landlord accuracy, and neighbourhood infrastructure?"
+                   class="flex-1 px-3.5 py-2 rounded-xl bg-alabaster border border-neutral-200" />
+            <button type="submit" class="btn-lime px-5 py-2 text-xs font-extrabold shrink-0">
+              Save Property Review →
+            </button>
+          </div>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       2. ACTIVE NEGOTIATIONS (08) & SCHEDULED INSPECTIONS (09)
+       =================================================================== -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+    <!-- Left 6 Columns: 08 Active Deal Room Negotiations -->
+    <div class="lg:col-span-6 bento-card p-6 sm:p-7 bg-alabaster">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-xl font-bold text-charcoal">Active Price Negotiations</h3>
+        </div>
+        <a href="/properties" class="text-xs font-bold underline">Find Negotiable Listings</a>
+      </div>
+
+      <div class="space-y-3.5">
+        {% for neg in negotiations %}
+        <div class="bg-white rounded-3xl p-4 border border-neutral-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <span class="bg-lime text-charcoal font-bold px-2.5 py-0.5 rounded-full text-[10px]">
+              {{ neg.status }}
+            </span>
+            <h4 class="font-bold text-sm text-charcoal mt-1">{{ neg.property_title }}</h4>
+            <p class="text-neutral-500">
+              Listed: <span class="line-through">{{ neg.listed_price | naira }}</span> •
+              Current Deal Price: <strong class="text-charcoal">{{ neg.current_agreed_price | naira }}</strong>
+            </p>
+          </div>
+          <a href="/transactions/negotiate/{{ neg.property_id }}"
+             class="px-4 py-2 rounded-full bg-charcoal text-white font-bold text-xs shrink-0 text-center hover:bg-neutral-800">
+            Open Deal Room →
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Right 6 Columns: 09 Scheduled Inspections & Applications -->
+    <div class="lg:col-span-6 bento-card p-6 sm:p-7 bg-alabaster">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-xl font-bold text-charcoal">Scheduled Inspections & Applications</h3>
+        </div>
+        <a href="/matching" class="text-xs font-bold underline">Coordinate More</a>
+      </div>
+
+      <div class="space-y-3.5">
+        {% for insp in inspections %}
+        <div class="bg-white rounded-3xl p-4 border border-neutral-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-mono font-bold text-charcoal">{{ insp.id }}</span>
+              <span class="bg-emerald-100 text-emerald-900 font-bold px-2.5 py-0.5 rounded-full text-[10px]">
+                {{ insp.application_status }}
+              </span>
+            </div>
+            <h4 class="font-bold text-sm text-charcoal">{{ insp.property_title }}</h4>
+            <p class="text-neutral-500">📅 {{ insp.preferred_date }} at {{ insp.preferred_time }} • {{ insp.inspection_type }}</p>
+          </div>
+          <a href="/properties/{{ insp.property_id }}" class="btn-outline-pill px-3.5 py-1.5 text-xs shrink-0">
+            View Listing
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       3. ACCOUNTABILITY & COMPLAINT RESOLUTION (05) + PLATFORM REVIEW (06)
+       =================================================================== -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <!-- Left 7 Columns: 05 Landlord & Tenant Accountability Ledger -->
+    <div class="lg:col-span-7 bento-card p-6 sm:p-8 bg-white">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-xl font-bold text-charcoal">
+            Landlord & Tenant Accountability & Complaint Resolution
+          </h3>
+        </div>
+        <span class="bg-lime text-charcoal text-xs font-extrabold px-3 py-1 rounded-full">
+          Tenant Rep: 4.95★
+        </span>
+      </div>
+
+      <div class="space-y-3 mb-6">
+        {% for cmp in complaints %}
+        <div class="p-4 rounded-2xl bg-alabaster border border-neutral-200 text-xs">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+            <span class="font-bold text-charcoal">{{ cmp.id }} • {{ cmp.category }} ({{ cmp.property_title }})</span>
+            <span class="px-2.5 py-0.5 rounded-full font-bold text-[10px]
+              {% if cmp.status == 'Resolved' %}bg-lime text-charcoal{% else %}bg-amber-100 text-amber-900{% endif %}">
+              {{ cmp.status }}
+            </span>
+          </div>
+          <p class="text-neutral-600 mb-1.5">{{ cmp.description }}</p>
+          <p class="text-[11px] text-emerald-800 font-semibold">Resolution Log: {{ cmp.resolution_note }}</p>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- File New Complaint Form -->
+      <form action="/dashboard/accountability/file" method="post" class="p-5 rounded-3xl bg-alabaster border border-neutral-200 space-y-3 text-xs">
+        <input type="hidden" name="redirect_to" value="/dashboard/tenant" />
+        <input type="hidden" name="against_role" value="Landlord" />
+        <h4 class="font-bold text-charcoal text-sm">Log a New Landlord / Property Accountability Issue</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <input type="text" name="against_name" value="Engr. Tunde Bakare" required placeholder="Landlord / Agent Name"
+                 class="px-3.5 py-2 rounded-xl bg-white border border-neutral-200 font-semibold" />
+          <input type="text" name="property_title" value="Serenity Pines Contemporary Duplex" required placeholder="Property Title"
+                 class="px-3.5 py-2 rounded-xl bg-white border border-neutral-200 font-semibold" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <select name="category" class="px-3.5 py-2 rounded-xl bg-white border border-neutral-200 font-semibold">
+            <option value="Service Charge Audit">Service Charge Audit</option>
+            <option value="Caution Deposit Refund">Caution Deposit Refund</option>
+            <option value="Maintenance SLA Delay">Maintenance SLA Delay</option>
+          </select>
+          <select name="severity" class="px-3.5 py-2 rounded-xl bg-white border border-neutral-200 font-semibold">
+            <option value="Medium">Medium Priority</option>
+            <option value="High">High Priority (Escrow Hold)</option>
+          </select>
+        </div>
+        <textarea name="description" rows="2" required placeholder="Describe the issue with supporting facts..."
+                  class="w-full px-3.5 py-2 rounded-xl bg-white border border-neutral-200"></textarea>
+        <button type="submit" class="px-5 py-2.5 rounded-full bg-charcoal text-white font-bold text-xs hover:bg-neutral-800">
+          Submit to Accountability Ledger →
+        </button>
+      </form>
+    </div>
+
+    <!-- Right 5 Columns: Quick Platform Review Card -->
+    <div class="lg:col-span-5 rounded-4xl border-2 border-charcoal bg-white p-6 sm:p-7 shadow-lg">
+      <span class="bg-lime text-charcoal text-[11px] font-extrabold px-3 py-1 rounded-full">
+        Platform Feedback
+      </span>
+      <h3 class="text-xl font-bold text-charcoal mt-2">Rate the <span class="estate-brand">Estate</span> Platform</h3>
+      <p class="text-xs text-neutral-500 mt-1 mb-4">
+        Share how <span class="estate-brand">Estate</span>'s upfront charges, 7-day reconfirmation, or Deal Room helped you directly from your dashboard.
+      </p>
+
+      <form action="/reviews/add" method="post" class="space-y-3 text-xs">
+        <input type="hidden" name="redirect_to" value="/dashboard/tenant" />
+        <div>
+          <label class="block font-bold text-neutral-700 mb-1">Rating</label>
+          <select name="rating" class="w-full px-3 py-2 rounded-xl bg-alabaster border border-neutral-200 font-bold">
+            <option value="5">★★★★★ (5/5) — Exceptional Platform Utility</option>
+            <option value="4">★★★★☆ (4/5) — Very Useful</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-bold text-neutral-700 mb-1">Highlight Tag</label>
+          <input type="text" name="impact_tag" value="Smooth Multi-Property Escrow Checkout" required
+                 class="w-full px-3 py-2 rounded-xl bg-alabaster border border-neutral-200 font-semibold" />
+        </div>
+        <div>
+          <label class="block font-bold text-neutral-700 mb-1">Comment</label>
+          <textarea name="comment" rows="3" required placeholder="How has Estate been of good use to you?"
+                    class="w-full px-3 py-2 rounded-xl bg-alabaster border border-neutral-200"></textarea>
+        </div>
+        <button type="submit" class="btn-lime w-full py-3 text-xs font-extrabold">
+          Post Platform Review →
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
+

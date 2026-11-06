@@ -214,11 +214,17 @@
           </div>
         </div>
 
-        <!-- Verified Resident Feedback in this Area -->
-        <div class="border-t border-neutral-200 pt-5">
-          <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-3">
-            Verified Resident Feedback in {{ neighbourhood.name }}
-          </h4>
+        <!-- Verified Paid Tenant Feedback in this Area + Submit Review Form -->
+        <div id="area-intel-reviews" class="border-t border-neutral-200 pt-5 space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-500">
+              Verified Paid Tenant Reviews for {{ neighbourhood.name }}
+            </h4>
+            <span class="bg-lime text-charcoal text-[11px] font-extrabold px-3 py-0.5 rounded-full">
+              Published to Neighbourhood Intel
+            </span>
+          </div>
+
           {% if area_feedback %}
           <div class="space-y-3">
             {% for fb in area_feedback %}
@@ -242,15 +248,90 @@
             {% endfor %}
           </div>
           {% else %}
-          <p class="text-xs text-neutral-500">No resident reviews yet for this specific micro-axis.</p>
+          <p class="text-xs text-neutral-500">No verified paid tenant reviews yet for this specific district.</p>
+          {% endif %}
+
+          <!-- Review Submission Box (Strictly for Tenants/Buyers who have already paid for this property) -->
+          {% if is_paid_tenant %}
+          <div class="rounded-3xl border-2 border-charcoal bg-white p-5 sm:p-6 shadow-sm">
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span class="bg-lime text-charcoal text-[11px] font-extrabold px-3 py-1 rounded-full">
+                ✓ Verified Paid Tenant / Buyer Access Unlocked
+              </span>
+              <span class="text-[11px] text-neutral-500 font-semibold">Displays on Neighbourhood Intel</span>
+            </div>
+            <h4 class="text-base font-bold text-charcoal">
+              Review This Property & {{ neighbourhood.name }}
+            </h4>
+            <p class="text-xs text-neutral-500 mt-0.5 mb-4">
+              Because you have completed payment for <strong>{{ property.title }}</strong>, you can rate this property and share real neighbourhood intelligence (electricity, water, drainage, roads, and security). Your review will automatically appear on the Neighbourhood Intel page.
+            </p>
+
+            <form action="/properties/{{ property.id }}/area-review" method="post" class="space-y-3 text-xs">
+              <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
+                <div>
+                  <label class="block font-bold text-neutral-700 mb-1">Rating</label>
+                  <select name="rating" class="w-full px-3 py-2 rounded-xl bg-alabaster border border-neutral-200 font-bold">
+                    <option value="5">★★★★★ (5/5)</option>
+                    <option value="4">★★★★☆ (4/5)</option>
+                    <option value="3">★★★☆☆ (3/5)</option>
+                    <option value="2">★★☆☆☆ (2/5)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block font-bold text-neutral-700 mb-1">Electricity Report</label>
+                  <input type="text" name="power_report" value="{{ property.power_hours_per_day }} hrs/day verified" required
+                         class="w-full px-3 py-2 rounded-xl bg-alabaster border border-neutral-200 font-semibold" />
+                </div>
+                <div>
+                  <label class="block font-bold text-neutral-700 mb-1">Water Supply</label>
+                  <input type="text" name="water_report" value="{{ property.water_status }}" required
+                         class="w-full px-3 py-2 rounded-xl bg-alabaster border border-neutral-200 font-semibold" />
+                </div>
+                <div>
+                  <label class="block font-bold text-neutral-700 mb-1">Drainage / Roads</label>
+                  <input type="text" name="drainage_report" value="Flood-Free • {{ property.road_status }}" required
+                         class="w-full px-3 py-2 rounded-xl bg-alabaster border border-neutral-200 font-semibold" />
+                </div>
+              </div>
+
+              <div>
+                <label class="block font-bold text-neutral-700 mb-1">Your Property & Neighbourhood Review</label>
+                <textarea name="comment" rows="3" required
+                          placeholder="Share your experience with this property and the electricity, water, drainage, and security in {{ neighbourhood.name }}..."
+                          class="w-full px-3.5 py-2.5 rounded-xl bg-alabaster border border-neutral-200"></textarea>
+              </div>
+
+              <button type="submit" class="btn-lime px-6 py-3 text-xs font-extrabold">
+                Publish Review to Property & Neighbourhood Intel →
+              </button>
+            </form>
+          </div>
+          {% else %}
+          <div class="rounded-2xl bg-white p-4 border border-neutral-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+            <div>
+              <span class="font-bold text-charcoal block">🔒 Verified Paid Tenant Area Reviews Only</span>
+              <span class="text-neutral-500">
+                Complete checkout for this property to unlock the Property & Neighbourhood Intelligence review form here.
+              </span>
+            </div>
+            {% if property.status == 'Available' %}
+            <form action="/transactions/cart/add/{{ property.id }}" method="post" class="shrink-0">
+              <input type="hidden" name="redirect_to" value="/transactions/checkout" />
+              <button type="submit" class="px-4 py-2 rounded-full bg-charcoal text-white font-bold text-xs hover:bg-neutral-800 transition">
+                Checkout to Unlock Review →
+              </button>
+            </form>
+            {% endif %}
+          </div>
           {% endif %}
         </div>
       </div>
     </div>
 
-    <!-- Right 5 Columns: 02 Transparent Rental/Purchase Charges + 08 Negotiation + Inspection Booking -->
+    <!-- Right 5 Columns: Transparent Rental/Purchase Charges + Negotiation + Inspection Booking -->
     <div class="lg:col-span-5 space-y-6 sticky top-24">
-      <!-- 02 Transparent Rental / Purchase Cost Breakdown Card -->
+      <!-- Transparent Rental / Purchase Cost Breakdown Card -->
       <div class="rounded-4xl border-2 border-charcoal bg-white p-6 sm:p-7 shadow-xl">
         <div class="flex items-center justify-between mb-3">
           <span class="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Transparent Charges</span>
@@ -263,7 +344,7 @@
           Complete Cost Breakdown
         </h2>
         <p class="text-xs text-neutral-500 mt-1 mb-5">
-          Full financial commitment displayed upfront before you book an inspection or commit. Zero hidden fees.
+          Full financial commitment displayed upfront before you book an inspection or commit. Agency fee is strictly capped at <strong>{{ property.agency_fee_percent }}%</strong> ({{ 'Land Sale' if property.property_type == 'Land' else 'House / Residential' }}).
         </p>
 
         <div class="space-y-3 text-xs bg-alabaster rounded-3xl p-4 border border-neutral-200 mb-5">
@@ -275,7 +356,9 @@
           </div>
 
           <div class="flex justify-between items-center py-1 border-t border-neutral-200/70">
-            <span class="text-neutral-600">Agency / Brokerage Fee</span>
+            <span class="text-neutral-600">
+              Agency / Brokerage Fee ({{ property.agency_fee_percent }}% {{ 'Land Sale' if property.property_type == 'Land' else 'House Rate' }})
+            </span>
             <span class="font-semibold text-charcoal">{{ property.agency_fee | naira }}</span>
           </div>
 
@@ -284,6 +367,23 @@
             <span class="font-semibold text-charcoal">{{ property.legal_fee | naira }}</span>
           </div>
 
+          {% if property.property_type == 'Land' %}
+          <!-- Land-Specific Statutory Documents: C of O, R of O, TDP -->
+          <div class="flex justify-between items-center py-1 border-t border-neutral-200/70">
+            <span class="text-neutral-700 font-semibold">• C of O (Certificate of Occupancy)</span>
+            <span class="font-bold text-charcoal">{{ property.c_of_o_fee | naira }}</span>
+          </div>
+
+          <div class="flex justify-between items-center py-1 border-t border-neutral-200/70">
+            <span class="text-neutral-700 font-semibold">• R of O (Right of Occupancy)</span>
+            <span class="font-bold text-charcoal">{{ property.r_of_o_fee | naira }}</span>
+          </div>
+
+          <div class="flex justify-between items-center py-1 border-t border-neutral-200/70">
+            <span class="text-neutral-700 font-semibold">• TDP (Title Deed Plan)</span>
+            <span class="font-bold text-charcoal">{{ property.tdp_fee | naira }}</span>
+          </div>
+          {% else %}
           <div class="flex justify-between items-center py-1 border-t border-neutral-200/70">
             <span class="text-neutral-600">Refundable Caution Deposit</span>
             <span class="font-semibold text-charcoal">{{ property.caution_deposit | naira }}</span>
@@ -296,9 +396,10 @@
 
           {% if property.survey_or_deed_fee > 0 %}
           <div class="flex justify-between items-center py-1 border-t border-neutral-200/70">
-            <span class="text-neutral-600">Registered Survey & Deed Perfection</span>
+            <span class="text-neutral-600">Deed Perfection & Survey</span>
             <span class="font-semibold text-charcoal">{{ property.survey_or_deed_fee | naira }}</span>
           </div>
+          {% endif %}
           {% endif %}
 
           <div class="flex justify-between items-center pt-3 border-t-2 border-charcoal">

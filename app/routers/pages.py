@@ -53,8 +53,8 @@ def neighbourhoods_page(
     area: Optional[str] = None,
     session: Session = Depends(get_session),
 ):
-    """04 Neighbourhood Intelligence & Verified Resident Feedback."""
-    selected_key = area if area in NEIGHBOURHOODS else "lekki-phase-1"
+    """Neighbourhood Intelligence & Verified Paid-Tenant Resident Feedback."""
+    selected_key = area if area in NEIGHBOURHOODS else "maitama-abuja"
     selected_area = NEIGHBOURHOODS[selected_key]
 
     feedback_list = [
@@ -212,27 +212,27 @@ async def estate_ai_chatbot(
     available_props = [p for p in all_props if p.status == "Available"]
 
     # 1. Check if user is asking about land
-    if any(k in lower_msg for k in ["land", "plot", "sqm", "epe", "acre"]):
+    if any(k in lower_msg for k in ["land", "plot", "sqm", "katampe", "lugbe", "acre", "c of o", "r of o", "tdp"]):
         lands = [p for p in all_props if p.property_type == "Land"]
         lines = [
-            f"• **{p.title}** ({p.location}) — **{p.size_sqm} m²**, Stated Price: **₦{p.base_price:,}** (Full Commitment: **₦{p.total_initial_commitment:,}**). [View Plot](/properties/{p.id})"
+            f"• **{p.title}** ({p.location}) — **{p.size_sqm} m²**, Stated Price: **₦{p.base_price:,}** (5% Agency Fee + C of O + R of O + TDP included • Full Commitment: **₦{p.total_initial_commitment:,}**). [View Plot](/properties/{p.id})"
             for p in lands
         ]
         reply = (
-            "Here are our verified dry **Serviced Land Plots** on Estate (no bedroom/bathroom clutter, 100% surveyed):\n\n"
+            "Here are our verified dry **Serviced Land Plots** on Estate (including complete **C of O**, **R of O**, and **TDP** documentation breakdown and a **5% Land Sale Agency Fee**):\n\n"
             + "\n".join(lines)
         )
-        return {"reply": reply, "suggestions": ["How does negotiation work?", "Check Lekki power hours", "View all properties"]}
+        return {"reply": reply, "suggestions": ["How does negotiation work?", "Check Maitama power hours", "View all properties"]}
 
     # 2. Check if user is asking about houses, rent, duplex, bungalow, apartment, or listings
-    if any(k in lower_msg for k in ["rent", "buy", "house", "duplex", "bungalow", "apartment", "listing", "available", "property", "properties", "cheapest", "price"]):
+    if any(k in lower_msg for k in ["rent", "buy", "house", "duplex", "bungalow", "apartment", "listing", "available", "property", "properties", "cheapest", "price", "abuja"]):
         sample = available_props[:4]
         lines = [
             f"• **{p.title}** ({p.category} • {p.property_type} in {p.location}) — Base: **₦{p.base_price:,}**, Full Commitment: **₦{p.total_initial_commitment:,}** ({'Negotiable' if p.is_negotiable else 'Fixed'}). [Inspect](/properties/{p.id})"
             for p in sample
         ]
         reply = (
-            f"We currently have **{len(available_props)} verified available listings** out of {len(all_props)} total properties on Estate:\n\n"
+            f"We currently have **{len(available_props)} verified available listings** across Abuja (Maitama, Asokoro, Wuse II, Guzape, Jabi, Katampe, Airport Road) and Lagos on Estate:\n\n"
             + "\n".join(lines)
             + "\n\nWould you like me to match you by budget or bedroom count?"
         )
@@ -242,8 +242,9 @@ async def estate_ai_chatbot(
     if any(k in lower_msg for k in ["fee", "charge", "cost", "commitment", "agency", "legal", "caution", "escrow", "pay", "checkout"]):
         reply = (
             "**Transparent Charges & Escrow Protection on Estate:**\n\n"
-            "1. **Full Commitment Before Inspection**: Every listing shows the exact upfront sum of Base Rent/Price + Agency Fee + Legal Fee + Caution Deposit + Service Charge before you book a viewing.\n"
-            "2. **Estate Escrow Checkout**: When you pay at `/transactions/checkout`, your money is held safely in our Escrow Vault until keys or land documents are physically handed over, and the listing is automatically marked **Unavailable**."
+            "1. **Standardized Agency Fees**: **7%** for houses/apartments and **5%** for land sales.\n"
+            "2. **Land Statutory Documents Included**: Every land plot breakdown explicitly itemizes **C of O** (Certificate of Occupancy), **R of O** (Right of Occupancy), and **TDP** (Title Deed Plan).\n"
+            "3. **Estate Escrow Checkout**: When you pay at `/transactions/checkout`, your money is held safely in our Escrow Vault until keys or land documents are physically handed over."
         )
         return {"reply": reply, "suggestions": ["Open Checkout Tray", "How does Deal Room negotiation work?", "Contact Support"]}
 

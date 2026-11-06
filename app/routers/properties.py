@@ -1,7 +1,9 @@
 from datetime import datetime, timezone
+from pathlib import Path
 import re
+import shutil
 from typing import Optional
-from fastapi import APIRouter, Depends, Form, Request, HTTPException
+from fastapi import APIRouter, Depends, File, Form, Request, HTTPException, UploadFile
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session, select
 
@@ -12,12 +14,17 @@ from app.demo_state import (
     RESIDENT_FEEDBACK,
     NEGOTIATIONS,
     INSPECTIONS_AND_APPLICATIONS,
+    TENANT_RENTED_OR_BOUGHT,
     get_current_user,
+    has_user_paid_for_property,
     set_flash_message,
 )
 from app.template_utils import render_page
 
 router = APIRouter(tags=["properties"])
+
+UPLOAD_DIR = Path("app/static/uploads")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def slugify(text: str) -> str:
@@ -55,7 +62,6 @@ def list_properties(
             continue
         filtered.append(p)
 
-    # Counts by type for UI summary
     counts = {
         "total": len(all_props),
         "houses": sum(1 for p in all_props if p.property_type in ("Duplex", "Bungalow")),
@@ -99,8 +105,8 @@ def property_detail(
         fb for fb in RESIDENT_FEEDBACK if fb["neighbourhood_key"] == prop.neighbourhood_key
     ]
     negotiation = NEGOTIATIONS.get(prop.id)
+    is_paid_tenant = has_user_paid_for_property(prop.id)
 
-    # Similar properties
     similar = list(
         session.exec(
             select(Property).where(Property.id != prop.id).limit(3)
@@ -115,9 +121,71 @@ def property_detail(
             "neighbourhood": neighbourhood,
             "area_feedback": area_feedback,
             "negotiation": negotiation,
+            "is_paid_tenant": is_paid_tenant,
             "similar_properties": similar,
         },
     )
+
+
+@router.post("/properties/{property_id}/area-review")
+def submit_paid_tenant_area_review(
+    request: Request,
+    property_id: int,
+    rating: int = Form(5),
+    power_report: str = Form("22 hrs/day verified"),
+    water_report: str = Form("Clean treated water"),
+    drainage_report: str = Form("Flood-free drainage"),
+    comment: str = Form(...),
+    session: Session = Depends(get_session),
+):
+    """
+    Allows an already paid tenant/buyer to submit a review of a property and its area
+    directly on the property page, and automatically publishes it to Neighbourhood Intel.
+    """
+    prop = session.get(Property, property_id)
+    if not prop:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    if not has_user_paid_for_property(prop.id):
+        set_flash_message(
+            request,
+            "Only verified tenants/buyers who have completed payment for this property can post an area review.",
+            "warning",
+        )
+        return RedirectResponse(url=f"/properties/{property_id}", status_code=303)
+
+    user = get_current_user(request)
+    new_fb = {
+        "id": len(RESIDENT_FEEDBACK) + 1,
+        "property_id": prop.id,
+        "property_title": prop.title,
+        "neighbourhood_key": prop.neighbourhood_key,
+        "resident_name": user["name"],
+        "residency_duration": f"Verified Paid {'Buyer' if prop.category == 'Buy' else 'Tenant'} ({prop.title})",
+        "verification_badge": "Escrow Payment & Tenancy Verified",
+        "rating": max(1, min(5, rating)),
+        "power_report": power_report.strip(),
+        "water_report": water_report.strip(),
+        "drainage_report": drainage_report.strip(),
+        "comment": comment.strip(),
+        "created_at": "Just now",
+    }
+    RESIDENT_FEEDBACK.insert(0, new_fb)
+
+    # Also update the tenant's portfolio review if present
+    for tx in TENANT_RENTED_OR_BOUGHT:
+        if tx["property_id"] == prop.id:
+            tx["my_property_rating"] = max(1, min(5, rating))
+            tx["my_property_review"] = comment.strip()
+            break
+
+    nb_name = NEIGHBOURHOODS.get(prop.neighbourhood_key, {}).get("name", prop.location)
+    set_flash_message(
+        request,
+        f"Your verified review for '{prop.title}' and '{nb_name}' is now live on this page and in Neighbourhood Intel!",
+        "success",
+    )
+    return RedirectResponse(url=f"/properties/{property_id}#area-intel-reviews", status_code=303)
 
 
 @router.post("/properties/{property_id}/book-inspection")
@@ -168,14 +236,14 @@ def matching_page(
     negotiable_only: Optional[bool] = False,
     session: Session = Depends(get_session),
 ):
-    """09 Personalised Property Matching & Inspection Coordination."""
+    """Personalised Property Matching & Inspection Coordination."""
     all_props = list(
         session.exec(select(Property).where(Property.status == "Available")).all()
     )
 
     scored_matches = []
     for p in all_props:
-        score = 72  # Base compatibility score
+        score = 72
         reasons = ["Verified Authority Shield"]
 
         if category and category != "Any":
@@ -192,7 +260,7 @@ def matching_page(
             else:
                 score -= 15
 
-        if bedrooms is not None and bedrooms > 0:
+        if bedrooms is not None and bedrooms > 0 and p.property_type != "Land":
             if p.bedrooms == bedrooms:
                 score += 8
                 reasons.append(f"{p.bedrooms} Bedrooms match")
@@ -239,8 +307,8 @@ def matching_page(
                 "category": category or "Any",
                 "property_type": property_type or "Any",
                 "bedrooms": bedrooms if bedrooms is not None else 3,
-                "max_budget": max_budget or 12000000,
-                "min_power_hours": min_power_hours or 18,
+                "max_budget": max_budget or 15000000,
+                "min_power_hours": min_power_hours or 20,
                 "negotiable_only": negotiable_only,
             },
         },
@@ -253,47 +321,67 @@ def create_property(
     title: str = Form(...),
     category: str = Form("Rent"),
     property_type: str = Form("Duplex"),
-    location: str = Form(...),
-    neighbourhood_key: str = Form("lekki-phase-1"),
+    location: str = Form("Maitama District, Abuja"),
+    neighbourhood_key: str = Form("maitama-abuja"),
     address_hint: str = Form(...),
-    bedrooms: int = Form(3),
-    bathrooms: int = Form(3),
-    size_sqm: int = Form(250),
-    image_url: str = Form(
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85"
-    ),
+    bedrooms: int = Form(0),
+    bathrooms: int = Form(0),
+    size_sqm: int = Form(320),
+    image_file: Optional[UploadFile] = File(None),
     description: str = Form(...),
-    features_csv: str = Form("20hrs Power,Treated Water,Biometric Security,Prepaid Meter"),
+    features_csv: str = Form("22hrs Power,Treated Water,Biometric Security,Prepaid Meter"),
     authority_role: str = Form("Direct Landlord"),
-    authority_document: str = Form("Governor's Consent & Utility Proof"),
+    authority_document: str = Form("FCDA C of O & AGIS Verification"),
     base_price: int = Form(...),
-    agency_fee: int = Form(0),
-    legal_fee: int = Form(0),
-    caution_deposit: int = Form(0),
-    service_charge: int = Form(0),
-    survey_or_deed_fee: int = Form(0),
+    legal_fee: int = Form(350000),
+    caution_deposit: int = Form(300000),
+    service_charge: int = Form(400000),
+    c_of_o_fee: int = Form(0),
+    r_of_o_fee: int = Form(0),
+    tdp_fee: int = Form(0),
     is_negotiable: bool = Form(False),
     min_acceptable_price: int = Form(0),
-    power_hours_per_day: int = Form(20),
+    power_hours_per_day: int = Form(22),
     session: Session = Depends(get_session),
 ):
     user = get_current_user(request)
     effective_min = min_acceptable_price if min_acceptable_price > 0 else int(base_price * 0.92)
-    nb_info = NEIGHBOURHOODS.get(neighbourhood_key, NEIGHBOURHOODS["lekki-phase-1"])
+    nb_info = NEIGHBOURHOODS.get(neighbourhood_key, NEIGHBOURHOODS["maitama-abuja"])
+
+    # Handle uploaded image file from Landlord
+    saved_image_url = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85"
+    if image_file and image_file.filename:
+        ext = Path(image_file.filename).suffix.lower() or ".jpg"
+        if ext not in (".jpg", ".jpeg", ".png", ".webp", ".gif"):
+            ext = ".jpg"
+        safe_filename = f"prop-{int(datetime.now().timestamp())}{ext}"
+        dest_path = UPLOAD_DIR / safe_filename
+        with dest_path.open("wb") as buffer:
+            shutil.copyfileobj(image_file.file, buffer)
+        saved_image_url = f"/static/uploads/{safe_filename}"
+
+    # Enforce 7% Agency Fee for Houses/Apartments and 5% for Land Sales
+    is_land = property_type == "Land"
+    computed_agency_fee = int(base_price * 0.05) if is_land else int(base_price * 0.07)
+
+    # Default C of O, R of O, and TDP fees for Land if landlord left them as 0
+    final_c_of_o = (c_of_o_fee if c_of_o_fee > 0 else 1500000) if is_land else 0
+    final_r_of_o = (r_of_o_fee if r_of_o_fee > 0 else 750000) if is_land else 0
+    final_tdp = (tdp_fee if tdp_fee > 0 else 500000) if is_land else 0
 
     new_prop = Property(
         title=title.strip(),
         slug=slugify(title),
-        category=category,
+        category="Buy" if is_land else category,
         property_type=property_type,
         location=location.strip(),
         neighbourhood_key=neighbourhood_key,
         address_hint=address_hint.strip(),
-        bedrooms=bedrooms,
-        bathrooms=bathrooms,
+        bedrooms=0 if is_land else bedrooms,
+        bathrooms=0 if is_land else bathrooms,
         size_sqm=size_sqm,
-        image_url=image_url.strip() or "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=85",
-        secondary_image_url="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=900&q=80",
+        image_url=saved_image_url,
+        secondary_image_url=saved_image_url,
         description=description.strip(),
         features_csv=features_csv,
         is_verified=True,
@@ -305,19 +393,22 @@ def create_property(
         landlord_email=user["email"],
         landlord_reputation=user.get("reputation_score", 4.9),
         base_price=base_price,
-        price_period="year" if category == "Rent" else "outright",
-        agency_fee=agency_fee,
+        price_period="outright" if (is_land or category == "Buy") else "year",
+        agency_fee=computed_agency_fee,
         legal_fee=legal_fee,
-        caution_deposit=caution_deposit,
-        service_charge=service_charge,
-        survey_or_deed_fee=survey_or_deed_fee,
+        caution_deposit=0 if is_land else caution_deposit,
+        service_charge=0 if is_land else service_charge,
+        survey_or_deed_fee=0,
+        c_of_o_fee=final_c_of_o,
+        r_of_o_fee=final_r_of_o,
+        tdp_fee=final_tdp,
         status="Available",
         last_confirmed_at=datetime.now(timezone.utc),
         power_hours_per_day=power_hours_per_day,
         water_status=nb_info["water_note"],
-        drainage_score=9.2,
+        drainage_score=9.5,
         road_status=nb_info["roads_note"],
-        security_score=9.5,
+        security_score=9.6,
         is_negotiable=is_negotiable,
         min_acceptable_price=effective_min,
     )
@@ -339,7 +430,7 @@ def reconfirm_property_availability(
     property_id: int,
     session: Session = Depends(get_session),
 ):
-    """03 Property Update: Landlord reconfirms availability for the next 7 days."""
+    """Landlord reconfirms availability for the next 7 days."""
     prop = session.get(Property, property_id)
     if not prop:
         raise HTTPException(status_code=404, detail="Property not found")
@@ -364,7 +455,7 @@ def toggle_property_status(
     property_id: int,
     session: Session = Depends(get_session),
 ):
-    """03 Property Update: Toggle between Available and Unavailable (Rented/Sold)."""
+    """Toggle between Available and Unavailable (Rented/Sold)."""
     prop = session.get(Property, property_id)
     if not prop:
         raise HTTPException(status_code=404, detail="Property not found")
@@ -390,7 +481,7 @@ def toggle_property_verification(
     property_id: int,
     session: Session = Depends(get_session),
 ):
-    """01 Verified Property Listings: Admin verifies or revokes advertiser authority."""
+    """Admin verifies or revokes advertiser authority."""
     prop = session.get(Property, property_id)
     if not prop:
         raise HTTPException(status_code=404, detail="Property not found")
@@ -407,4 +498,3 @@ def toggle_property_verification(
     )
     referer = request.headers.get("referer", "/dashboard/admin")
     return RedirectResponse(url=referer, status_code=303)
-

@@ -149,67 +149,51 @@
       {% endfor %}
     </div>
 
-    <!-- Right 5 Columns: Submit Verified Resident Feedback Form -->
-    <div class="lg:col-span-5 rounded-4xl border-2 border-charcoal bg-white p-6 sm:p-8 shadow-lg sticky top-24">
-      <span class="bg-lime text-charcoal text-[11px] font-extrabold px-3 py-1 rounded-full">
-        Resident Intelligence Portal
-      </span>
-      <h3 class="text-xl font-bold text-charcoal mt-2">Live in one of these areas?</h3>
-      <p class="text-xs text-neutral-500 mt-1 mb-5">
-        Share honest feedback on electricity, water, drainage, roads, and security to guide prospective tenants.
-      </p>
+    <!-- Right 5 Columns: Verified Paid Tenant Review Policy & Quick Links -->
+    <div class="lg:col-span-5 rounded-4xl border-2 border-charcoal bg-white p-6 sm:p-8 shadow-lg sticky top-24 space-y-5">
+      <div>
+        <span class="bg-lime text-charcoal text-[11px] font-extrabold px-3 py-1 rounded-full">
+          100% Anti-Hype Verification
+        </span>
+        <h3 class="text-xl font-bold text-charcoal mt-2">How Area Reviews Work on <span class="estate-brand">Estate</span></h3>
+        <p class="text-xs text-neutral-500 mt-1 leading-relaxed">
+          To prevent fake reviews, area intelligence reviews are submitted directly on a <strong>Property Page</strong> by verified tenants and buyers who have already completed payment for that property. Once submitted on the property page, their review automatically appears here!
+        </p>
+      </div>
 
-      <form action="/neighbourhoods/feedback" method="post" class="space-y-3.5 text-xs">
-        <div>
-          <label class="block font-bold text-neutral-700 mb-1">Select Your Neighbourhood</label>
-          <select name="neighbourhood_key" class="w-full px-3.5 py-2.5 rounded-xl bg-alabaster border border-neutral-200 font-semibold">
-            {% for nb in neighbourhoods %}
-            <option value="{{ nb.key }}" {% if nb.key == selected_key %}selected{% endif %}>{{ nb.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
+      <div class="bg-alabaster rounded-3xl p-4 border border-neutral-200 space-y-2.5 text-xs">
+        <p class="font-bold text-charcoal">Already Paid for a Property? Submit Your Area Review on Its Page:</p>
+        <a href="/properties/1#area-intel-reviews"
+           class="flex items-center justify-between p-3 rounded-2xl bg-white border border-neutral-200 hover:border-charcoal transition">
+          <div>
+            <span class="font-bold text-charcoal block">Serenity Pines Duplex (Maitama, Abuja)</span>
+            <span class="text-[11px] text-emerald-700 font-semibold">✓ Paid Tenant Review Unlocked</span>
+          </div>
+          <span class="circle-arrow-btn bg-lime text-charcoal w-8 h-8 text-xs font-bold">→</span>
+        </a>
 
-        <div class="grid grid-cols-2 gap-3">
+        <a href="/properties/4#area-intel-reviews"
+           class="flex items-center justify-between p-3 rounded-2xl bg-white border border-neutral-200 hover:border-charcoal transition">
           <div>
-            <label class="block font-bold text-neutral-700 mb-1">Your Name</label>
-            <input type="text" name="resident_name" value="{{ current_user.name }}" required
-                   class="w-full px-3 py-2 rounded-xl bg-alabaster border border-neutral-200 font-semibold" />
+            <span class="font-bold text-charcoal block">Terra Crest Land Plot (Guzape, Abuja)</span>
+            <span class="text-[11px] text-emerald-700 font-semibold">✓ Paid Buyer Review Unlocked</span>
           </div>
-          <div>
-            <label class="block font-bold text-neutral-700 mb-1">Residency Duration</label>
-            <input type="text" name="residency_duration" value="3 Years Verified Resident" required
-                   class="w-full px-3 py-2 rounded-xl bg-alabaster border border-neutral-200 font-semibold" />
-          </div>
-        </div>
+          <span class="circle-arrow-btn bg-lime text-charcoal w-8 h-8 text-xs font-bold">→</span>
+        </a>
 
-        <div class="grid grid-cols-3 gap-2">
+        <a href="/properties/8#area-intel-reviews"
+           class="flex items-center justify-between p-3 rounded-2xl bg-white border border-neutral-200 hover:border-charcoal transition">
           <div>
-            <label class="block font-bold text-neutral-700 mb-1">Power Hrs/Day</label>
-            <input type="text" name="power_report" value="21 hrs/day avg" required
-                   class="w-full px-2.5 py-2 rounded-xl bg-alabaster border border-neutral-200" />
+            <span class="font-bold text-charcoal block">Veranda Court Terrace (Lekki Phase 1)</span>
+            <span class="text-[11px] text-emerald-700 font-semibold">✓ Paid Tenant Review Unlocked</span>
           </div>
-          <div>
-            <label class="block font-bold text-neutral-700 mb-1">Water Status</label>
-            <input type="text" name="water_report" value="Clean Borehole" required
-                   class="w-full px-2.5 py-2 rounded-xl bg-alabaster border border-neutral-200" />
-          </div>
-          <div>
-            <label class="block font-bold text-neutral-700 mb-1">Drainage</label>
-            <input type="text" name="drainage_report" value="Flood-Free" required
-                   class="w-full px-2.5 py-2 rounded-xl bg-alabaster border border-neutral-200" />
-          </div>
-        </div>
+          <span class="circle-arrow-btn bg-lime text-charcoal w-8 h-8 text-xs font-bold">→</span>
+        </a>
+      </div>
 
-        <div>
-          <label class="block font-bold text-neutral-700 mb-1">Detailed Area Experience (Roads, Security, Noise)</label>
-          <textarea name="comment" rows="3" required placeholder="How is power stability, rainy season drainage, and night security?"
-                    class="w-full px-3.5 py-2 rounded-xl bg-alabaster border border-neutral-200"></textarea>
-        </div>
-
-        <button type="submit" class="btn-lime w-full py-3 text-xs font-extrabold">
-          Publish Verified Resident Report →
-        </button>
-      </form>
+      <a href="/properties" class="btn-lime w-full py-3.5 text-xs font-extrabold">
+        Browse All Properties to Review →
+      </a>
     </div>
   </div>
 </section>

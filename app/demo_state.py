@@ -2,16 +2,15 @@
 In-memory Demo & Session State for Estate MVP.
 While Property Listings are stored dynamically in SQLite (estate.db),
 this module provides pre-populated, interactive state for:
-- Users (Tenant, Landlord, Admin) + Signup/Login & instant Role Switcher
-- 04 Neighbourhood Intelligence Profiles & Verified Resident Feedback
-- 05 Landlord & Tenant Accountability (Reputation profiles & Complaint resolution tickets)
-- 06 Platform Reviews & Purchased/Rented Property Reviews
-- 07 Help Center (FAQs & Contact Support submissions)
-- 08 Transaction-Support Deal Room (Structured Offer & Counter-Offer Timelines)
-- 09 & 10 Inspection Bookings, Tenant Applications, and Multi-Property Checkout Cart
+- Users (Tenant, Landlord, Admin) + Signup/Login & Role Switcher
+- Neighbourhood Intelligence Profiles & Verified Resident Feedback (Abuja majority + Lagos)
+- Landlord & Tenant Accountability (Reputation profiles & Complaint resolution tickets)
+- Platform Reviews (mix of mostly positive 5★/4★ reviews and realistic critical 2★/1★ reviews)
+- Help Center (FAQs & Contact Support submissions)
+- Transaction-Support Deal Room (Structured Offer & Counter-Offer Timelines)
+- Inspection Bookings, Tenant Applications, and Multi-Property Checkout Cart
 """
 
-from datetime import datetime
 from typing import Any
 from fastapi import Request
 
@@ -40,7 +39,7 @@ USERS_DB: list[dict[str, Any]] = [
         "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
         "badge": "Verified Property Owner • 4.9★",
         "reputation_score": 4.90,
-        "verified_identity": "Land Registry & CAC Verified",
+        "verified_identity": "AGIS Land Registry & CAC Verified",
         "phone": "+234 809 210 7780",
     },
     {
@@ -58,221 +57,250 @@ USERS_DB: list[dict[str, Any]] = [
 ]
 
 # ---------------------------------------------------------------------------
-# 2. NEIGHBOURHOOD INTELLIGENCE PROFILES & VERIFIED RESIDENT FEEDBACK (04)
+# 2. NEIGHBOURHOOD INTELLIGENCE PROFILES & VERIFIED RESIDENT FEEDBACK
+#    (Majority Abuja districts + Lekki Phase 1, Lagos)
 # ---------------------------------------------------------------------------
 NEIGHBOURHOODS: dict[str, dict[str, Any]] = {
-    "lekki-phase-1": {
-        "key": "lekki-phase-1",
-        "name": "Lekki Phase 1, Lagos",
-        "tagline": "Premier Waterfront & Commercial-Residential Hub",
-        "image": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=80",
-        "electricity_hours": 22,
-        "electricity_note": "EKEDC Band-A Feeder + Central Estate IPP Backup",
-        "water_rating": "9.4/10",
-        "water_note": "Central Reverse-Osmosis Treatment Plant",
-        "drainage_rating": "9.2/10",
-        "drainage_note": "Elevated Admiralty Axis — Deep Covered Storm Channels",
-        "roads_rating": "9.5/10",
-        "roads_note": "Interlocked Inner Closes with Solar Streetlighting",
-        "security_rating": "9.7/10",
-        "security_note": "Biometric Gate Pass, ANPR Cameras & 24/7 Armed Patrol",
-        "avg_rent_2bed": 5500000,
-        "avg_rent_4bed": 8500000,
-    },
-    "old-ikoyi": {
-        "key": "old-ikoyi",
-        "name": "Old Ikoyi, Lagos",
-        "tagline": "Ultra-Prime Diplomatic & Luxury Residential Enclave",
-        "image": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=80",
-        "electricity_hours": 24,
-        "electricity_note": "Dedicated 33kV Feeder + Dual Redundant Turbines",
-        "water_rating": "9.8/10",
-        "water_note": "Potable Municipal Trunk + UV Filtration",
-        "drainage_rating": "9.8/10",
-        "drainage_note": "Zero Flood History — Engineered Canal Outfall",
-        "roads_rating": "9.9/10",
-        "roads_note": "Dual-Carriageway Tree-Lined Boulevards",
-        "security_rating": "9.9/10",
-        "security_note": "Diplomatic Zone Surveillance & Rapid Response Squad",
-        "avg_rent_2bed": 14000000,
-        "avg_rent_4bed": 25000000,
-    },
-    "ikeja-gra": {
-        "key": "ikeja-gra",
-        "name": "Ikeja GRA, Lagos",
-        "tagline": "Quiet Tree-Lined Heritage Estates Near Airport",
-        "image": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=80",
-        "electricity_hours": 21,
-        "electricity_note": "Ikeja Electric Bilateral Line (21–23 hrs daily)",
-        "water_rating": "9.5/10",
-        "water_note": "Low-Iron Freshwater Table + Estate Boreholes",
-        "drainage_rating": "9.5/10",
-        "drainage_note": "Natural Upland Topography — Never Floods",
-        "roads_rating": "9.6/10",
-        "roads_note": "Newly Resurfaced Asphalt & Dedicated Walkways",
-        "security_rating": "9.6/10",
-        "security_note": "Controlled Resident Stickers & Close Gates",
-        "avg_rent_2bed": 4500000,
-        "avg_rent_4bed": 7500000,
-    },
-    "victoria-island": {
-        "key": "victoria-island",
-        "name": "Victoria Island Annex, Lagos",
-        "tagline": "Walk-to-Work Financial District & Serviced Enclaves",
-        "image": "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=900&q=80",
-        "electricity_hours": 22,
-        "electricity_note": "VI Independent Power Network + Band-A Grid",
-        "water_rating": "9.3/10",
-        "water_note": "Desalination & Industrial Treatment Plant",
-        "drainage_rating": "9.3/10",
-        "drainage_note": "Upgraded Collector Drains along Oniru Corridor",
-        "roads_rating": "9.4/10",
-        "roads_note": "Paved Estate Boulevards with Fiber Ducts",
-        "security_rating": "9.6/10",
-        "security_note": "24/7 Corporate & Estate Joint Security Taskforce",
-        "avg_rent_2bed": 7000000,
-        "avg_rent_4bed": 12000000,
-    },
-    "yaba-mainland": {
-        "key": "yaba-mainland",
-        "name": "Yaba Tech Corridor, Lagos",
-        "tagline": "Central Mainland Innovation & University Hub",
-        "image": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=900&q=80",
-        "electricity_hours": 18,
-        "electricity_note": "Band-A Alagomeji Feeder (18–20 hrs daily)",
-        "water_rating": "8.9/10",
-        "water_note": "Clean Freshwater Boreholes",
-        "drainage_rating": "8.7/10",
-        "drainage_note": "Covered Concrete Slab Drains",
-        "roads_rating": "9.0/10",
-        "roads_note": "Tarred Grid Streets with Quick 3rd Mainland Access",
-        "security_rating": "9.1/10",
-        "security_note": "Gated Street Associations & Night Vigils",
-        "avg_rent_2bed": 3200000,
-        "avg_rent_4bed": 5000000,
-    },
     "maitama-abuja": {
         "key": "maitama-abuja",
         "name": "Maitama District, Abuja",
         "tagline": "Serene Hills, Wide Boulevards & Diplomatic Residences",
-        "image": "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=900&q=80",
+        "image": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=80",
         "electricity_hours": 23,
-        "electricity_note": "AEDC Priority Grid + Solar Hybrid Estates",
+        "electricity_note": "AEDC Priority Band-A Grid + Solar Hybrid Estates",
         "water_rating": "9.7/10",
-        "water_note": "Lower Usuma Dam Mains + Filtration",
-        "drainage_rating": "9.7/10",
+        "water_note": "Lower Usuma Dam Mains + Triple Filtration",
+        "drainage_rating": "9.8/10",
         "drainage_note": "Master-Planned Underground Storm Infrastructure",
         "roads_rating": "9.9/10",
-        "roads_note": "Multi-Lane Express Asphalt & Cycle Lanes",
+        "roads_note": "Multi-Lane Express Asphalt & Solar Streetlights",
         "security_rating": "9.8/10",
-        "security_note": "High-Security Diplomatic Patrol Zone",
+        "security_note": "High-Security Diplomatic Patrol Zone & Biometric Gates",
         "avg_rent_2bed": 6500000,
-        "avg_rent_4bed": 11000000,
+        "avg_rent_4bed": 10000000,
     },
-    "epe-corridor": {
-        "key": "epe-corridor",
-        "name": "Epe Growth Corridor, Lagos",
-        "tagline": "Fastest Appreciating Land & Eco-Residential Belt",
+    "asokoro-abuja": {
+        "key": "asokoro-abuja",
+        "name": "Asokoro District, Abuja",
+        "tagline": "Ultra-Prime Presidential & Diplomatic Residential Enclave",
+        "image": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=80",
+        "electricity_hours": 24,
+        "electricity_note": "Dedicated 33kV Priority Feeder + Estate Backup",
+        "water_rating": "9.9/10",
+        "water_note": "FCT Municipal Trunk + UV Hospital-Grade Filtration",
+        "drainage_rating": "9.9/10",
+        "drainage_note": "Elevated Rock Topography — Zero Flood History",
+        "roads_rating": "9.9/10",
+        "roads_note": "Dual-Carriageway Tree-Lined Diplomatic Boulevards",
+        "security_rating": "9.9/10",
+        "security_note": "24/7 Diplomatic Zone Surveillance & Rapid Response",
+        "avg_rent_2bed": 8500000,
+        "avg_rent_4bed": 18000000,
+    },
+    "wuse-2-abuja": {
+        "key": "wuse-2-abuja",
+        "name": "Wuse II, Abuja",
+        "tagline": "Central Commercial-Residential Hub & Quiet Tree-Lined Closes",
+        "image": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=80",
+        "electricity_hours": 22,
+        "electricity_note": "AEDC Band-A Aminu Kano Feeder (22 hrs daily)",
+        "water_rating": "9.5/10",
+        "water_note": "Constant FCT Water Board Supply + Estate Boreholes",
+        "drainage_rating": "9.5/10",
+        "drainage_note": "Deep Covered Storm Collector Channels",
+        "roads_rating": "9.7/10",
+        "roads_note": "Smooth Asphalt Grid with Dedicated Pedestrian Walkways",
+        "security_rating": "9.6/10",
+        "security_note": "Gated Residential Closes & 24/7 Smart CCTV",
+        "avg_rent_2bed": 4500000,
+        "avg_rent_4bed": 8000000,
+    },
+    "guzape-abuja": {
+        "key": "guzape-abuja",
+        "name": "Guzape District, Abuja",
+        "tagline": "Fast-Rising Luxury Hilltop Views & Serviced Plots",
+        "image": "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=900&q=80",
+        "electricity_hours": 22,
+        "electricity_note": "Underground High-Tension Feeder + Solar Estates",
+        "water_rating": "9.4/10",
+        "water_note": "FCT Mains Extension + Deep Rock Boreholes",
+        "drainage_rating": "9.7/10",
+        "drainage_note": "Natural Hilltop Gradient — Instant Rainwater Runoff",
+        "roads_rating": "9.6/10",
+        "roads_note": "Newly Constructed FCDA Hilltop Boulevards",
+        "security_rating": "9.7/10",
+        "security_note": "Controlled Estate Gatehouses & Armed Mobile Patrol",
+        "avg_rent_2bed": 5000000,
+        "avg_rent_4bed": 9500000,
+    },
+    "jabi-abuja": {
+        "key": "jabi-abuja",
+        "name": "Jabi Lake Axis, Abuja",
+        "tagline": "Modern Waterfront Lifestyle, Retail & Tech Professional Hub",
+        "image": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=900&q=80",
+        "electricity_hours": 20,
+        "electricity_note": "AEDC Band-A Feeder (20 hrs daily average)",
+        "water_rating": "9.3/10",
+        "water_note": "FCT Water Board + Central Estate Treatment",
+        "drainage_rating": "9.3/10",
+        "drainage_note": "Engineered Lake Outfall & Covered Street Drains",
+        "roads_rating": "9.5/10",
+        "roads_note": "Tarred Grid Streets with Fiber-Optic Conduits",
+        "security_rating": "9.4/10",
+        "security_note": "Biometric Access & Perimeter Surveillance",
+        "avg_rent_2bed": 4000000,
+        "avg_rent_4bed": 7000000,
+    },
+    "katampe-abuja": {
+        "key": "katampe-abuja",
+        "name": "Katampe Extension, Abuja",
+        "tagline": "Elevated Diplomatic Enclave with Central Expressway Access",
+        "image": "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=900&q=80",
+        "electricity_hours": 22,
+        "electricity_note": "Katampe 132/33kV Substation Direct Feeder",
+        "water_rating": "9.5/10",
+        "water_note": "FCT Water Board + Borehole Backup",
+        "drainage_rating": "9.6/10",
+        "drainage_note": "Elevated Terrain with Lined Storm Drains",
+        "roads_rating": "9.7/10",
+        "roads_note": "Direct Nnamdi Azikiwe Expressway Interchange",
+        "security_rating": "9.7/10",
+        "security_note": "Diplomatic Enclave Gate Pass & Patrol",
+        "avg_rent_2bed": 4500000,
+        "avg_rent_4bed": 8500000,
+    },
+    "lugbe-abuja": {
+        "key": "lugbe-abuja",
+        "name": "Airport Road / Lugbe, Abuja",
+        "tagline": "High-Growth Residential & Serviced Land Corridor",
         "image": "https://images.unsplash.com/photo-1500076656116-558758c991c1?auto=format&fit=crop&w=900&q=80",
-        "electricity_hours": 16,
-        "electricity_note": "Expanding Grid + Solar Mini-Grid Ready",
-        "water_rating": "9.6/10",
-        "water_note": "100% Pure Natural Freshwater Table",
-        "drainage_rating": "9.0/10",
-        "drainage_note": "High Elevation Dry Laterite Soil",
-        "roads_rating": "9.2/10",
-        "roads_note": "Newly Constructed 6-Lane Rigid Concrete Highway",
-        "security_rating": "9.0/10",
-        "security_note": "Perimeter-Fenced Gatehouse Communities",
-        "avg_rent_2bed": 1500000,
-        "avg_rent_4bed": 2800000,
+        "electricity_hours": 19,
+        "electricity_note": "Airport Corridor Grid + Solar Mini-Grid Ready",
+        "water_rating": "9.2/10",
+        "water_note": "Clean Deep-Aquifer Borehole Network",
+        "drainage_rating": "9.1/10",
+        "drainage_note": "Dry Savannah Table Land",
+        "roads_rating": "9.5/10",
+        "roads_note": "10-Lane Airport Expressway Access",
+        "security_rating": "9.2/10",
+        "security_note": "Perimeter-Fenced Gated Estate Communities",
+        "avg_rent_2bed": 2200000,
+        "avg_rent_4bed": 4000000,
+    },
+    "lekki-phase-1": {
+        "key": "lekki-phase-1",
+        "name": "Lekki Phase 1, Lagos",
+        "tagline": "Premier Coastal Waterfront & Commercial-Residential Hub",
+        "image": "https://images.unsplash.com/photo-1600585152220-90363fe7e115?auto=format&fit=crop&w=900&q=80",
+        "electricity_hours": 20,
+        "electricity_note": "EKEDC Band-A Feeder + Central Estate IPP Backup",
+        "water_rating": "9.2/10",
+        "water_note": "Central Reverse-Osmosis Treatment Plant",
+        "drainage_rating": "9.1/10",
+        "drainage_note": "Elevated Admiralty Axis — Covered Storm Channels",
+        "roads_rating": "9.4/10",
+        "roads_note": "Interlocked Inner Closes with Solar Streetlighting",
+        "security_rating": "9.6/10",
+        "security_note": "Biometric Gate Pass, ANPR Cameras & 24/7 Patrol",
+        "avg_rent_2bed": 5500000,
+        "avg_rent_4bed": 8500000,
     },
 }
 
 RESIDENT_FEEDBACK: list[dict[str, Any]] = [
     {
         "id": 1,
-        "neighbourhood_key": "lekki-phase-1",
-        "resident_name": "Kemi Adeyemi",
-        "residency_duration": "3 Years Verified Resident",
-        "verification_badge": "Utility Bill & Tenancy Verified",
+        "property_id": 1,
+        "property_title": "Serenity Pines Contemporary Duplex",
+        "neighbourhood_key": "maitama-abuja",
+        "resident_name": "Chidi Nwosu",
+        "residency_duration": "Verified Paid Tenant",
+        "verification_badge": "Escrow Payment & Tenancy Verified",
         "rating": 5,
-        "power_report": "22 hrs/day average",
-        "water_report": "Odorless & clear treated water",
-        "drainage_report": "Zero waterlogging even during July peak rain",
+        "power_report": "23 hrs/day AEDC + Hybrid",
+        "water_report": "Crystal clear FCT Water Board supply",
+        "drainage_report": "Zero waterlogging, underground storm drains",
         "comment": (
-            "Living off Admiralty Way has been effortless. The estate central plant switches over in 15 seconds, "
-            "and street security requires a dynamic code from residents before any visitor enters."
+            "After paying via Estate Escrow and moving into Maitama, the 23 hrs/day power rating has been 100% accurate. "
+            "Water pressure is strong and night security on Gana Street is top-tier."
         ),
         "created_at": "2 days ago",
     },
     {
         "id": 2,
-        "neighbourhood_key": "ikeja-gra",
-        "resident_name": "Dr. Olumide Bamidele",
-        "residency_duration": "5 Years Verified Homeowner",
-        "verification_badge": "Land Use Charge Verified",
+        "property_id": 4,
+        "property_title": "Terra Crest Serviced Land Plot (600 SQM)",
+        "neighbourhood_key": "guzape-abuja",
+        "resident_name": "Chidi Nwosu",
+        "residency_duration": "Verified Paid Land Buyer",
+        "verification_badge": "Escrow Payment & TDP Verified",
         "rating": 5,
-        "power_report": "21 hrs/day Bilateral Feeder",
-        "water_report": "Freshwater borehole, zero iron staining",
-        "drainage_report": "Naturally elevated terrain, completely dry",
+        "power_report": "22 hrs/day underground feeder",
+        "water_report": "FCT trunk mains connected at plot boundary",
+        "drainage_report": "Elevated Guzape hillside, completely flood-free",
         "comment": (
-            "If you value quiet evenings, mature trees, and genuine Band-A electricity without noisy generators, "
-            "Oduduwa Crescent in Ikeja GRA is unmatched in Lagos."
+            "Purchased my 600 SQM plot here on Estate. Receiving the C of O, R of O, and TDP breakdown upfront made due diligence "
+            "at AGIS effortless. The hilltop road paving is already completed."
         ),
         "created_at": "5 days ago",
     },
     {
         "id": 3,
-        "neighbourhood_key": "yaba-mainland",
-        "resident_name": "Tosin Falana",
-        "residency_duration": "2 Years Verified Resident",
-        "verification_badge": "Tenancy Contract Verified",
-        "rating": 4,
-        "power_report": "18 hrs/day PHCN",
-        "water_report": "Clean borehole water",
-        "drainage_report": "Drains cleared quarterly by street association",
+        "property_id": 3,
+        "property_title": "Lakeside Tranquility Nordic Bungalow",
+        "neighbourhood_key": "wuse-2-abuja",
+        "resident_name": "Dr. Halima Yusuf",
+        "residency_duration": "2 Years Verified Paid Tenant",
+        "verification_badge": "Escrow Payment Verified",
+        "rating": 5,
+        "power_report": "22 hrs/day Band-A Feeder",
+        "water_report": "Constant municipal water + borehole backup",
+        "drainage_report": "Deep covered channels, dry all year",
         "comment": (
-            "Commuting to Victoria Island takes 18 minutes via Third Mainland Bridge. Fiber internet speeds "
-            "are fantastic and the neighbourhood is super walkable."
+            "Wuse II off Aminu Kano is super central yet surprisingly quiet inside the close. "
+            "Everything promised in the Neighbourhood Intelligence report matched reality."
         ),
         "created_at": "1 week ago",
     },
     {
         "id": 4,
-        "neighbourhood_key": "old-ikoyi",
-        "resident_name": "Ngozi Kachikwu",
-        "residency_duration": "4 Years Verified Resident",
-        "verification_badge": "Deed & Utility Verified",
+        "property_id": 8,
+        "property_title": "Veranda Court Serviced 3-Bed Terrace",
+        "neighbourhood_key": "lekki-phase-1",
+        "resident_name": "Chidi Nwosu",
+        "residency_duration": "Verified Paid Tenant",
+        "verification_badge": "Escrow Payment Verified",
         "rating": 5,
-        "power_report": "24 hrs/day uninterrupted",
-        "water_report": "Hospital-grade filtered water",
-        "drainage_report": "10/10 engineered drainage",
+        "power_report": "20 hrs/day Estate IPP",
+        "water_report": "Odorless & clear reverse-osmosis water",
+        "drainage_report": "Interlocked road stayed dry during heavy rain",
         "comment": (
-            "Complete peace of mind. Morning jogs along Bourdillon feel safe at 5:30 AM and power has not blinked once this quarter."
+            "Checked out this terrace on Estate. The central estate plant switches over in seconds and visitor access is strictly via code."
         ),
         "created_at": "2 weeks ago",
     },
 ]
 
 # ---------------------------------------------------------------------------
-# 3. TENANT'S PURCHASED / RENTED PROPERTIES & REVIEWS (Extra Note + 06)
+# 3. TENANT'S PURCHASED / RENTED PROPERTIES & REVIEWS
+#    (Includes properties #1, #4, and #8 so Demo Tenant can immediately test
+#     submitting a Property & Area review directly on those property pages!)
 # ---------------------------------------------------------------------------
 TENANT_RENTED_OR_BOUGHT: list[dict[str, Any]] = [
     {
         "transaction_id": "EST-TX-99410",
         "property_id": 8,
         "property_title": "Veranda Court Serviced 3-Bed Terrace",
-        "property_location": "Chevron Drive, Lekki, Lagos",
+        "property_location": "Lekki Phase 1, Lagos",
         "property_image": "https://images.unsplash.com/photo-1600585152220-90363fe7e115?auto=format&fit=crop&w=800&q=80",
         "category": "Rent",
         "landlord_name": "Engr. Tunde Bakare",
-        "amount_paid": 7800000,
+        "amount_paid": 7620000,
         "date_completed": "14 Oct 2026",
         "payment_method": "Estate Escrow Bank Transfer",
         "my_property_rating": 5,
         "my_property_review": (
-            "Exact cost breakdown matched my checkout receipt to the last Naira. The landlord handed over keys "
+            "Exact 7% agency fee and cost breakdown matched my checkout receipt to the last Naira. The landlord handed over keys "
             "within 24 hours and the property was immediately marked Unavailable on Estate."
         ),
     },
@@ -280,69 +308,143 @@ TENANT_RENTED_OR_BOUGHT: list[dict[str, Any]] = [
         "transaction_id": "EST-TX-88204",
         "property_id": 4,
         "property_title": "Terra Crest Serviced Land Plot (600 SQM)",
-        "property_location": "Victoria Island Annex, Lagos",
+        "property_location": "Guzape District, Abuja",
         "property_image": "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80",
         "category": "Buy",
         "landlord_name": "Engr. Tunde Bakare",
-        "amount_paid": 94400000,
+        "amount_paid": 90100000,
         "date_completed": "02 Sep 2026",
         "payment_method": "Estate Escrow Tranche",
         "my_property_rating": 5,
         "my_property_review": (
-            "Negotiated ₦5,000,000 off the asking price using Estate's structured Deal Room. Survey and C of O "
-            "were already verified so allocation took less than 48 hours."
+            "Negotiated ₦5,000,000 off the asking price in the Deal Room. Having C of O, R of O, and TDP clearly itemized "
+            "alongside the 5% land agency fee made allocation in Guzape seamless."
         ),
     },
-]
-
-PLATFORM_REVIEWS: list[dict[str, Any]] = [
     {
-        "id": 1,
-        "user_name": "Chidi Nwosu",
-        "user_role": "Verified Tenant & Land Buyer",
-        "user_avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
-        "rating": 5,
-        "impact_tag": "Saved ₦700k in Negotiated Rent & Avoided Fake Agents",
-        "property_ref": "Veranda Court Serviced 3-Bed Terrace",
-        "comment": (
-            "Before Estate, I wasted ₦60,000 on inspection fees for houses that were already rented out! "
-            "Estate's 7-day availability reconfirmation and upfront charge calculator showed me the exact agency, "
-            "legal, and caution deposit before I even booked a viewing."
+        "transaction_id": "EST-TX-77109",
+        "property_id": 1,
+        "property_title": "Serenity Pines Contemporary Duplex",
+        "property_location": "Maitama District, Abuja",
+        "property_image": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
+        "category": "Rent",
+        "landlord_name": "Engr. Tunde Bakare",
+        "amount_paid": 12350000,
+        "date_completed": "01 Nov 2026",
+        "payment_method": "Estate Escrow Card (Visa/Verve)",
+        "my_property_rating": 5,
+        "my_property_review": (
+            "Secured a second unit in Maitama through Estate. Power and water in the neighbourhood are exactly as stated."
         ),
-        "date": "3 days ago",
-    },
-    {
-        "id": 2,
-        "user_name": "Zainab Lawal",
-        "user_role": "Verified Tenant (Ikeja GRA)",
-        "user_avatar": "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=200&q=80",
-        "rating": 5,
-        "impact_tag": "Neighbourhood Power & Drainage Stats Were 100% Accurate",
-        "property_ref": "Lakeside Tranquility Nordic Bungalow",
-        "comment": (
-            "Agents always claim '24 hours light' until you move in. Estate's Neighbourhood Intelligence showed "
-            "21 hrs/day verified by actual residents on Oduduwa Crescent, and it has been spot on since I moved in."
-        ),
-        "date": "1 week ago",
-    },
-    {
-        "id": 3,
-        "user_name": "Engr. Tunde Bakare",
-        "user_role": "Verified Landlord (6 Properties)",
-        "user_avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
-        "rating": 5,
-        "impact_tag": "Zero Unqualified Calls — Structured Offer Timeline",
-        "property_ref": "Serenity Pines Contemporary Duplex",
-        "comment": (
-            "The Landlord Dashboard lets me screen verified tenants, review structured price offers without endless "
-            "WhatsApp back-and-forth, and reconfirm availability in one click every 7 days."
-        ),
-        "date": "2 weeks ago",
     },
 ]
 
 # ---------------------------------------------------------------------------
-# 4. LANDLORD & TENANT ACCOUNTABILITY / COMPLAINT RESOLUTION SYSTEM (05)
+# 4. PLATFORM REVIEWS (Majority Positive 5★/4★ + Some Critical/Bad 2★ Reviews)
+# ---------------------------------------------------------------------------
+PLATFORM_REVIEWS: list[dict[str, Any]] = [
+    {
+        "id": 1,
+        "user_name": "Chidi Nwosu",
+        "user_role": "Verified Tenant & Land Buyer (Abuja)",
+        "user_avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+        "rating": 5,
+        "impact_tag": "7% House Agency Cap & Zero Fake Agents",
+        "property_ref": "Serenity Pines Contemporary Duplex (Maitama)",
+        "comment": (
+            "Before Estate, Abuja agents demanded 10%–15% agency fees and wasted my time on houses that were already rented! "
+            "Estate's capped 7% house agency fee and 7-day availability reconfirmation showed me the exact commitment upfront."
+        ),
+        "date": "2 days ago",
+    },
+    {
+        "id": 2,
+        "user_name": "Zainab Lawal",
+        "user_role": "Verified Tenant (Wuse II, Abuja)",
+        "user_avatar": "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=200&q=80",
+        "rating": 5,
+        "impact_tag": "Neighbourhood Power & Water Stats Were 100% Accurate",
+        "property_ref": "Lakeside Tranquility Nordic Bungalow",
+        "comment": (
+            "Only verified paid tenants can post area reviews on property pages, which means zero fake hype. "
+            "The 22 hrs/day AEDC power report in Wuse II has been completely accurate since I moved in."
+        ),
+        "date": "5 days ago",
+    },
+    {
+        "id": 3,
+        "user_name": "Damilola Ojo",
+        "user_role": "Prospective Tenant (Jabi, Abuja)",
+        "user_avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80",
+        "rating": 2,
+        "impact_tag": "Strict Non-Negotiable Filter on Some Bungalows",
+        "property_ref": "Lakeside Tranquility Nordic Bungalow",
+        "comment": (
+            "I really wanted to negotiate the rent on the Wuse II bungalow by ₦400,000, but the platform locked the Deal Room "
+            "because the landlord marked it as Fixed Price. Also had to wait 24 hours for Saturday inspection slots to open up."
+        ),
+        "date": "1 week ago",
+    },
+    {
+        "id": 4,
+        "user_name": "Engr. Tunde Bakare",
+        "user_role": "Verified Landlord (Abuja & Lagos Portfolio)",
+        "user_avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
+        "rating": 5,
+        "impact_tag": "C of O, R of O & TDP Transparency Sold My Guzape Plot Fast",
+        "property_ref": "Terra Crest Serviced Land Plot (600 SQM)",
+        "comment": (
+            "Buyers in Abuja always ask for C of O, R of O, and TDP costs before committing. Having those three documents "
+            "broken down alongside the 5% land agency fee closed my Guzape land sale in 48 hours."
+        ),
+        "date": "1 week ago",
+    },
+    {
+        "id": 5,
+        "user_name": "Dr. Halima Yusuf",
+        "user_role": "Verified Buyer (Katampe Extension, Abuja)",
+        "user_avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80",
+        "rating": 5,
+        "impact_tag": "Saved ₦6M in the Deal Room & Smooth Escrow Handover",
+        "property_ref": "Cedar Horizon Architectural Bungalow",
+        "comment": (
+            "The structured Deal Room timeline is miles better than endless WhatsApp chats. We agreed on a fair counter-offer "
+            "and my funds stayed protected in Estate Escrow until the AGIS deed was handed over."
+        ),
+        "date": "2 weeks ago",
+    },
+    {
+        "id": 6,
+        "user_name": "Ibrahim Garba",
+        "user_role": "Prospective Land Buyer (Lugbe, Abuja)",
+        "user_avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80",
+        "rating": 2,
+        "impact_tag": "7-Day Expiry Hid a Listing Before I Could Pay",
+        "property_ref": "Centenary Greenbelt Residential Land",
+        "comment": (
+            "While I appreciate the anti-fraud verification, a property I was eyeing got temporarily flagged because the landlord "
+            "was 1 day late on their 7-day reconfirmation timer, and customer support took 3 hours to reply to my ticket."
+        ),
+        "date": "3 weeks ago",
+    },
+    {
+        "id": 7,
+        "user_name": "Barr. Nkechi Eze",
+        "user_role": "Verified Tenant (Maitama, Abuja)",
+        "user_avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=200&q=80",
+        "rating": 4,
+        "impact_tag": "Great Verification & Smart Property Matcher",
+        "property_ref": "Serenity Pines Contemporary Duplex",
+        "comment": (
+            "Matched at 98% compatibility for my family in Maitama. Everything from the FCDA C of O check to the physical "
+            "inspection was super professional."
+        ),
+        "date": "3 weeks ago",
+    },
+]
+
+# ---------------------------------------------------------------------------
+# 5. LANDLORD & TENANT ACCOUNTABILITY / COMPLAINT RESOLUTION SYSTEM
 # ---------------------------------------------------------------------------
 ACCOUNTABILITY_COMPLAINTS: list[dict[str, Any]] = [
     {
@@ -351,10 +453,10 @@ ACCOUNTABILITY_COMPLAINTS: list[dict[str, Any]] = [
         "filed_by_role": "Tenant",
         "against_name": "Engr. Tunde Bakare",
         "against_role": "Landlord",
-        "property_title": "Veranda Court Serviced 3-Bed Terrace",
+        "property_title": "Serenity Pines Contemporary Duplex (Maitama, Abuja)",
         "category": "Service Charge Reconciliation",
         "severity": "Medium",
-        "description": "Requested itemized diesel consumption receipt for Q3 estate generator service charge.",
+        "description": "Requested itemized solar & backup diesel ledger for Q3 estate service charge.",
         "status": "Resolved",
         "resolution_note": "Landlord uploaded audited estate meter ledger within 18 hours. Both parties signed off.",
         "reputation_impact": "+0.05 Bonus for Fast Resolution",
@@ -369,7 +471,7 @@ ACCOUNTABILITY_COMPLAINTS: list[dict[str, Any]] = [
         "property_title": "Serenity Pines Contemporary Duplex",
         "category": "Missed Scheduled Inspection",
         "severity": "Low",
-        "description": "Prospective tenant booked 10:00 AM Saturday physical inspection but did not show up or cancel.",
+        "description": "Prospective tenant booked 10:00 AM Saturday physical inspection in Maitama but did not show up.",
         "status": "Under Review",
         "resolution_note": "Compliance team notified applicant; 1 attendance strike logged on applicant profile.",
         "reputation_impact": "Pending Admin Mediation",
@@ -377,33 +479,33 @@ ACCOUNTABILITY_COMPLAINTS: list[dict[str, Any]] = [
     },
     {
         "id": "CMP-2052",
-        "filed_by_name": "Adaeze Okafor",
+        "filed_by_name": "Dr. Halima Yusuf",
         "filed_by_role": "Tenant",
         "against_name": "Unverified Third-Party Agent",
         "against_role": "Agent",
-        "property_title": "Flagged Duplicate Listing (Removed)",
+        "property_title": "Flagged Duplicate Listing in Wuse II (Removed)",
         "category": "Unauthorized Listing Attempt",
         "severity": "High",
         "description": "Reported an external agent attempting to re-upload photos of a verified Direct Landlord listing.",
         "status": "Resolved",
-        "resolution_note": "Admin revoked agent access and locked listing under EST-VER-8821 Direct Landlord authority.",
+        "resolution_note": "Admin revoked agent access and locked listing under EST-VER-7430 Direct Landlord authority.",
         "reputation_impact": "Fake Ad Blocked Automatically",
         "created_at": "02 Nov 2026",
     },
 ]
 
 # ---------------------------------------------------------------------------
-# 5. TRANSACTION-SUPPORT NEGOTIATIONS ("DEAL ROOM" TIMELINES) (08)
+# 6. TRANSACTION-SUPPORT NEGOTIATIONS ("DEAL ROOM" TIMELINES)
 # ---------------------------------------------------------------------------
 NEGOTIATIONS: dict[int, dict[str, Any]] = {
     1: {
         "property_id": 1,
-        "property_title": "Serenity Pines Contemporary Duplex",
+        "property_title": "Serenity Pines Contemporary Duplex (Maitama, Abuja)",
         "tenant_name": "Chidi Nwosu",
         "landlord_name": "Engr. Tunde Bakare",
-        "listed_price": 8500000,
-        "current_agreed_price": 8000000,
-        "status": "Counter-Offer Active",  # "Offer Sent", "Counter-Offer Active", "Accepted", "Declined"
+        "listed_price": 10000000,
+        "current_agreed_price": 9500000,
+        "status": "Counter-Offer Active",
         "payment_tenure": "1 Year Annual Lease",
         "move_in_target": "15 Nov 2026",
         "events": [
@@ -412,8 +514,8 @@ NEGOTIATIONS: dict[int, dict[str, Any]] = {
                 "actor": "System Verification",
                 "role": "system",
                 "badge": "Authority Confirmed",
-                "proposed_price": 8500000,
-                "note": "Listing EST-VER-8821 verified as Negotiable by Direct Landlord (Engr. Tunde Bakare).",
+                "proposed_price": 10000000,
+                "note": "Listing EST-VER-8821 in Maitama verified as Negotiable by Direct Landlord (Engr. Tunde Bakare).",
                 "timestamp": "Yesterday, 09:15 AM",
             },
             {
@@ -421,8 +523,8 @@ NEGOTIATIONS: dict[int, dict[str, Any]] = {
                 "actor": "Chidi Nwosu (Tenant)",
                 "role": "tenant",
                 "badge": "Initial Structured Offer",
-                "proposed_price": 7800000,
-                "note": "Ready to pay full commitment within 48 hours via Estate Escrow if we can close at ₦7,800,000/yr.",
+                "proposed_price": 9200000,
+                "note": "Ready to pay full commitment within 48 hours via Estate Escrow if we can close at ₦9,200,000/yr.",
                 "timestamp": "Yesterday, 02:30 PM",
             },
             {
@@ -430,19 +532,19 @@ NEGOTIATIONS: dict[int, dict[str, Any]] = {
                 "actor": "Engr. Tunde Bakare (Landlord)",
                 "role": "landlord",
                 "badge": "Landlord Counter-Offer",
-                "proposed_price": 8000000,
-                "note": "Appreciate your verified profile! I can approve ₦8,000,000/yr inclusive of exterior repainting before move-in.",
+                "proposed_price": 9500000,
+                "note": "Appreciate your verified profile! I can approve ₦9,500,000/yr inclusive of exterior repainting before move-in.",
                 "timestamp": "Today, 10:05 AM",
             },
         ],
     },
     4: {
         "property_id": 4,
-        "property_title": "Terra Crest Serviced Land Plot (600 SQM)",
+        "property_title": "Terra Crest Serviced Land Plot (600 SQM, Guzape Abuja)",
         "tenant_name": "Chidi Nwosu",
         "landlord_name": "Engr. Tunde Bakare",
-        "listed_price": 95000000,
-        "current_agreed_price": 90000000,
+        "listed_price": 80000000,
+        "current_agreed_price": 75000000,
         "status": "Accepted",
         "payment_tenure": "Outright Purchase (Escrow Protected)",
         "move_in_target": "Immediate Allocation",
@@ -452,8 +554,8 @@ NEGOTIATIONS: dict[int, dict[str, Any]] = {
                 "actor": "Chidi Nwosu (Tenant/Buyer)",
                 "role": "tenant",
                 "badge": "Purchase Offer",
-                "proposed_price": 90000000,
-                "note": "Offering ₦90,000,000 single-tranche settlement upon verification of Registered Survey #LA/2025/882.",
+                "proposed_price": 75000000,
+                "note": "Offering ₦75,000,000 single-tranche settlement upon verification of C of O, R of O, and TDP.",
                 "timestamp": "3 days ago",
             },
             {
@@ -461,8 +563,8 @@ NEGOTIATIONS: dict[int, dict[str, Any]] = {
                 "actor": "Engr. Tunde Bakare (Landlord)",
                 "role": "landlord",
                 "badge": "Offer Accepted ✓",
-                "proposed_price": 90000000,
-                "note": "Offer accepted. Price locked at ₦90,000,000 for your checkout.",
+                "proposed_price": 75000000,
+                "note": "Offer accepted. Price locked at ₦75,000,000 for your checkout.",
                 "timestamp": "2 days ago",
             },
         ],
@@ -470,27 +572,27 @@ NEGOTIATIONS: dict[int, dict[str, Any]] = {
 }
 
 # ---------------------------------------------------------------------------
-# 6. INSPECTIONS & TENANT APPLICATIONS (09 & 10)
+# 7. INSPECTIONS & TENANT APPLICATIONS
 # ---------------------------------------------------------------------------
 INSPECTIONS_AND_APPLICATIONS: list[dict[str, Any]] = [
     {
         "id": "INSP-501",
         "property_id": 1,
         "property_title": "Serenity Pines Contemporary Duplex",
-        "location": "Lekki Phase 1, Lagos",
+        "location": "Maitama District, Abuja",
         "applicant_name": "Chidi Nwosu",
         "applicant_score": "4.95★ Verified Tenant",
         "preferred_date": "Saturday, 07 Nov 2026",
         "preferred_time": "11:00 AM",
         "inspection_type": "Physical On-Site Viewing",
-        "application_status": "Approved for Selection",  # "Pending Review", "Inspection Confirmed", "Approved for Selection"
-        "note": "Pre-vetted income & NIN verified. Transparent cost breakdown accepted.",
+        "application_status": "Approved for Selection",
+        "note": "Pre-vetted income & NIN verified. Transparent 7% agency cost breakdown accepted.",
     },
     {
         "id": "INSP-502",
         "property_id": 3,
         "property_title": "Lakeside Tranquility Nordic Bungalow",
-        "location": "Ikeja GRA, Lagos",
+        "location": "Wuse II, Abuja",
         "applicant_name": "Chidi Nwosu",
         "applicant_score": "4.95★ Verified Tenant",
         "preferred_date": "Tuesday, 10 Nov 2026",
@@ -503,7 +605,7 @@ INSPECTIONS_AND_APPLICATIONS: list[dict[str, Any]] = [
         "id": "INSP-503",
         "property_id": 2,
         "property_title": "Prairie Vista Glass Villa",
-        "location": "Old Ikoyi, Lagos",
+        "location": "Asokoro District, Abuja",
         "applicant_name": "Chief Emeka Onoh",
         "applicant_score": "4.88★ Verified Buyer",
         "preferred_date": "Thursday, 12 Nov 2026",
@@ -515,7 +617,7 @@ INSPECTIONS_AND_APPLICATIONS: list[dict[str, Any]] = [
 ]
 
 # ---------------------------------------------------------------------------
-# 7. HELP CENTER: FAQs & SUPPORT TICKETS (07)
+# 8. HELP CENTER: FAQs & SUPPORT TICKETS
 # ---------------------------------------------------------------------------
 FAQS: list[dict[str, str]] = [
     {
@@ -523,18 +625,18 @@ FAQS: list[dict[str, str]] = [
         "question": "How does Estate verify that a property is genuine and the advertiser has authority?",
         "answer": (
             "Every property displaying the 'Verified by Estate' shield goes through a 3-step check: "
-            "(1) Title & ownership document verification (C of O, Governor's Consent, or Registered Deed), "
+            "(1) Title & ownership document verification (FCDA C of O, R of O, TDP, or Governor's Consent), "
             "(2) Signed Mandate or Direct Landlord identity match (NIN/CAC), and "
             "(3) On-site physical inspection with geo-tagged media."
         ),
     },
     {
         "category": "Transparent Charges",
-        "question": "Are there any hidden inspection, agency, or legal fees after I commit?",
+        "question": "What is the Agency Fee rate for houses vs. land, and what land documents are included?",
         "answer": (
-            "Never. Our Transparent Rental & Purchase Calculator breaks down Base Rent/Price, Agency Fee, "
-            "Legal/Agreement Fee, Caution Deposit, and Service Charge upfront on every property page before you "
-            "book an inspection or add to cart."
+            "Agency fees on Estate are strictly capped at 7% for houses/apartments and 5% for land sales. "
+            "For land listings, the Complete Cost Breakdown also explicitly itemizes Certificate of Occupancy (C of O), "
+            "Right of Occupancy (R of O), and Title Deed Plan (TDP) charges upfront before you commit."
         ),
     },
     {
@@ -548,10 +650,11 @@ FAQS: list[dict[str, str]] = [
     },
     {
         "category": "Neighbourhood Intelligence",
-        "question": "Who provides the electricity, water, drainage, and security ratings?",
+        "question": "Who is allowed to submit reviews for a property and its neighbourhood?",
         "answer": (
-            "Metrics combine Estate's field telemetry (feeder band classification & elevation data) with reviews "
-            "from Verified Residents who have uploaded proof of residency (utility bill or active tenancy agreement)."
+            "Only verified tenants and buyers who have completed payment for a property can submit a Property & Area "
+            "Intelligence Review on that property's page. Once submitted, their feedback is automatically published "
+            "to the Neighbourhood Intelligence hub."
         ),
     },
     {
@@ -590,16 +693,23 @@ def get_current_user(request: Request) -> dict[str, Any]:
     return USERS_DB[0]
 
 
+def has_user_paid_for_property(property_id: int) -> bool:
+    """Return True if the tenant has already paid for / checked out this property."""
+    for tx in TENANT_RENTED_OR_BOUGHT:
+        if tx["property_id"] == property_id:
+            return True
+    return False
+
+
 def get_cart_ids(request: Request) -> list[int]:
     """Return list of property IDs currently selected in the tenant's checkout tray."""
     if "cart_ids" not in request.session:
-        # Pre-populate with Property #1 so user can immediately test checkout or add/remove more
         request.session["cart_ids"] = [1]
     return request.session["cart_ids"]
 
 
 def get_effective_base_price(property_obj: Any) -> int:
-    """Return negotiated price if an offer is Accepted or Active in the Deal Room, else listed base_price."""
+    """Return negotiated price if an offer is Accepted in the Deal Room, else listed base_price."""
     neg = NEGOTIATIONS.get(property_obj.id)
     if neg and neg.get("status") == "Accepted":
         return int(neg["current_agreed_price"])
@@ -613,4 +723,3 @@ def get_flash_message(request: Request) -> dict[str, str] | None:
 
 def set_flash_message(request: Request, title: str, kind: str = "success") -> None:
     request.session["flash"] = {"title": title, "kind": kind}
-

@@ -76,17 +76,24 @@
               <span class="font-bold text-charcoal">{{ item.effective_base_price | naira }}</span>
             </div>
             <div>
-              <span class="text-neutral-400 block">Agency Fee</span>
+              <span class="text-neutral-400 block">Agency Fee ({{ prop.agency_fee_percent }}%)</span>
               <span class="font-semibold text-charcoal">{{ prop.agency_fee | naira }}</span>
             </div>
             <div>
               <span class="text-neutral-400 block">Legal / Deed</span>
               <span class="font-semibold text-charcoal">{{ (prop.legal_fee + prop.survey_or_deed_fee) | naira }}</span>
             </div>
+            {% if prop.property_type == 'Land' %}
+            <div>
+              <span class="text-neutral-400 block">C of O + R of O + TDP</span>
+              <span class="font-semibold text-charcoal">{{ (prop.c_of_o_fee + prop.r_of_o_fee + prop.tdp_fee) | naira }}</span>
+            </div>
+            {% else %}
             <div>
               <span class="text-neutral-400 block">Caution Deposit</span>
               <span class="font-semibold text-charcoal">{{ prop.caution_deposit | naira }}</span>
             </div>
+            {% endif %}
             <div>
               <span class="text-neutral-400 block">Service Charge</span>
               <span class="font-semibold text-charcoal">{{ prop.service_charge | naira }}</span>

@@ -33,15 +33,27 @@
             </div>
           </div>
 
-          <span class="bg-lime text-charcoal font-extrabold text-xs px-3 py-1 rounded-full">
-            {{ "★" * rev.rating }} ({{ rev.rating }}.0)
+          {% if rev.rating <= 2 %}
+          <span class="bg-rose-100 text-rose-900 border border-rose-200 font-extrabold text-xs px-3 py-1 rounded-full">
+            {{ "★" * rev.rating }}{{ "☆" * (5 - rev.rating) }} ({{ rev.rating }}.0)
           </span>
+          {% else %}
+          <span class="bg-lime text-charcoal font-extrabold text-xs px-3 py-1 rounded-full">
+            {{ "★" * rev.rating }}{{ "☆" * (5 - rev.rating) }} ({{ rev.rating }}.0)
+          </span>
+          {% endif %}
         </div>
 
         <div class="mb-3 flex flex-wrap gap-2">
+          {% if rev.rating <= 2 %}
+          <span class="bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold px-3 py-1 rounded-full">
+            ⚠ {{ rev.impact_tag }}
+          </span>
+          {% else %}
           <span class="bg-alabaster border border-neutral-200 text-charcoal text-xs font-bold px-3 py-1 rounded-full">
             ✦ {{ rev.impact_tag }}
           </span>
+          {% endif %}
           <span class="bg-emerald-50 text-emerald-800 text-xs font-semibold px-3 py-1 rounded-full">
             🏠 {{ rev.property_ref }}
           </span>

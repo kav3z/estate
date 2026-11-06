@@ -250,10 +250,10 @@
       </div>
     </div>
 
-    <form action="/properties/create" method="post" class="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
+    <form action="/properties/create" method="post" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
       <div>
         <label class="block font-bold text-neutral-700 mb-1">Property Title *</label>
-        <input type="text" name="title" required placeholder="e.g. Emerald Crest 4-Bed Detached Duplex"
+        <input type="text" name="title" required placeholder="e.g. Maitama Crest 4-Bed Detached Duplex"
                class="w-full px-3.5 py-2.5 rounded-xl bg-alabaster border border-neutral-300 font-semibold" />
       </div>
 
@@ -267,8 +267,8 @@
 
       <div>
         <label class="block font-bold text-neutral-700 mb-1">Property Type *</label>
-        <select name="property_type" class="w-full px-3.5 py-2.5 rounded-xl bg-alabaster border border-neutral-300 font-semibold"
-                onchange="const bb = document.getElementById('bedsBathsGroup'); if(this.value === 'Land'){ bb.classList.add('hidden'); } else { bb.classList.remove('hidden'); }">
+        <select id="propTypeSelect" name="property_type" class="w-full px-3.5 py-2.5 rounded-xl bg-alabaster border border-neutral-300 font-semibold"
+                onchange="toggleLandlordFormMode()">
           <option value="Duplex">Duplex</option>
           <option value="Bungalow">Bungalow</option>
           <option value="Apartment">Apartment</option>
@@ -278,7 +278,7 @@
 
       <div>
         <label class="block font-bold text-neutral-700 mb-1">City / Axis *</label>
-        <input type="text" name="location" value="Lekki Phase 1, Lagos" required
+        <input type="text" name="location" value="Maitama District, Abuja" required
                class="w-full px-3.5 py-2.5 rounded-xl bg-alabaster border border-neutral-300 font-semibold" />
       </div>
 
@@ -293,7 +293,7 @@
 
       <div>
         <label class="block font-bold text-neutral-700 mb-1">Street / Estate Address Hint *</label>
-        <input type="text" name="address_hint" value="Off Freedom Way, Lekki Phase 1" required
+        <input type="text" name="address_hint" value="Off Gana Street, Maitama, Abuja" required
                class="w-full px-3.5 py-2.5 rounded-xl bg-alabaster border border-neutral-300 font-semibold" />
       </div>
 
@@ -307,51 +307,74 @@
 
       <div>
         <label class="block font-bold text-neutral-700 mb-1">Ownership / Title Document</label>
-        <input type="text" name="authority_document" value="Governor's Consent & Land Registry Match" required
+        <input type="text" name="authority_document" value="FCDA C of O, R of O & AGIS TDP Match" required
                class="w-full px-3.5 py-2.5 rounded-xl bg-alabaster border border-neutral-300 font-semibold" />
       </div>
 
       <div>
-        <label class="block font-bold text-neutral-700 mb-1">Image URL</label>
-        <input type="url" name="image_url" value="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85"
-               class="w-full px-3.5 py-2.5 rounded-xl bg-alabaster border border-neutral-300" />
+        <label class="block font-bold text-charcoal mb-1">Upload Property Photo (JPG / PNG / WebP) *</label>
+        <input type="file" name="image_file" accept="image/*" required
+               class="w-full px-3 py-2 rounded-xl bg-alabaster border border-charcoal font-semibold file:mr-3 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-extrabold file:bg-lime file:text-charcoal cursor-pointer" />
       </div>
 
       <!-- Transparent Rental / Purchase Cost Inputs -->
       <div>
         <label class="block font-bold text-charcoal mb-1">Base Rent / Sale Price (₦) *</label>
-        <input type="number" name="base_price" value="7500000" required
+        <input id="basePriceInput" type="number" name="base_price" value="10000000" required
+               oninput="updateAgencyReadout()"
                class="w-full px-3.5 py-2.5 rounded-xl bg-lime/30 border border-charcoal font-extrabold" />
       </div>
 
       <div>
-        <label class="block font-bold text-neutral-700 mb-1">Agency Fee (₦)</label>
-        <input type="number" name="agency_fee" value="750000"
-               class="w-full px-3.5 py-2.5 rounded-xl bg-alabaster border border-neutral-300 font-semibold" />
+        <label id="agencyRateLabel" class="block font-bold text-neutral-700 mb-1">Agency Fee (7% House Cap — Auto)</label>
+        <input id="agencyFeeReadout" type="text" value="₦700,000 (7%)" readonly
+               class="w-full px-3.5 py-2.5 rounded-xl bg-alabaster border border-neutral-300 font-extrabold text-emerald-800" />
       </div>
 
       <div>
         <label class="block font-bold text-neutral-700 mb-1">Legal / Agreement Fee (₦)</label>
-        <input type="number" name="legal_fee" value="375000"
+        <input type="number" name="legal_fee" value="400000"
                class="w-full px-3.5 py-2.5 rounded-xl bg-alabaster border border-neutral-300 font-semibold" />
       </div>
 
-      <div>
-        <label class="block font-bold text-neutral-700 mb-1">Caution Deposit (₦)</label>
-        <input type="number" name="caution_deposit" value="400000"
-               class="w-full px-3.5 py-2.5 rounded-xl bg-alabaster border border-neutral-300 font-semibold" />
+      <!-- House-Specific Charges (Caution Deposit & Service Charge) -->
+      <div id="houseChargesGroup" class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div>
+          <label class="block font-bold text-neutral-700 mb-1">Caution Deposit (₦)</label>
+          <input type="number" name="caution_deposit" value="400000"
+                 class="w-full px-3.5 py-2.5 rounded-xl bg-alabaster border border-neutral-300 font-semibold" />
+        </div>
+
+        <div>
+          <label class="block font-bold text-neutral-700 mb-1">Annual Service Charge (₦)</label>
+          <input type="number" name="service_charge" value="500000"
+                 class="w-full px-3.5 py-2.5 rounded-xl bg-alabaster border border-neutral-300 font-semibold" />
+        </div>
       </div>
 
-      <div>
-        <label class="block font-bold text-neutral-700 mb-1">Annual Service Charge (₦)</label>
-        <input type="number" name="service_charge" value="500000"
-               class="w-full px-3.5 py-2.5 rounded-xl bg-alabaster border border-neutral-300 font-semibold" />
+      <!-- Land-Specific Statutory Document Charges (C of O, R of O, TDP) -->
+      <div id="landDocsGroup" class="hidden md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4 p-3.5 rounded-2xl bg-lime/25 border border-lime">
+        <div>
+          <label class="block font-bold text-charcoal mb-1">C of O Fee (₦)</label>
+          <input type="number" name="c_of_o_fee" value="2000000"
+                 class="w-full px-3 py-2 rounded-xl bg-white border border-neutral-300 font-bold" />
+        </div>
+        <div>
+          <label class="block font-bold text-charcoal mb-1">R of O Fee (₦)</label>
+          <input type="number" name="r_of_o_fee" value="1000000"
+                 class="w-full px-3 py-2 rounded-xl bg-white border border-neutral-300 font-bold" />
+        </div>
+        <div>
+          <label class="block font-bold text-charcoal mb-1">TDP Fee (₦)</label>
+          <input type="number" name="tdp_fee" value="650000"
+                 class="w-full px-3 py-2 rounded-xl bg-white border border-neutral-300 font-bold" />
+        </div>
       </div>
 
       <div>
         <label class="block font-bold text-neutral-700 mb-1">Size (SQM) & Rooms</label>
         <div class="grid grid-cols-3 gap-2">
-          <input type="number" name="size_sqm" value="320" placeholder="SQM" class="px-2.5 py-2 rounded-xl bg-alabaster border border-neutral-300 text-center font-bold" title="Size in SQM" />
+          <input type="number" name="size_sqm" value="350" placeholder="SQM" class="px-2.5 py-2 rounded-xl bg-alabaster border border-neutral-300 text-center font-bold" title="Size in SQM" />
           <div id="bedsBathsGroup" class="col-span-2 grid grid-cols-2 gap-2">
             <input type="number" name="bedrooms" value="4" placeholder="Beds" class="px-2.5 py-2 rounded-xl bg-alabaster border border-neutral-300 text-center font-bold" title="Bedrooms" />
             <input type="number" name="bathrooms" value="4" placeholder="Baths" class="px-2.5 py-2 rounded-xl bg-alabaster border border-neutral-300 text-center font-bold" title="Bathrooms" />
@@ -362,7 +385,7 @@
       <div class="md:col-span-2">
         <label class="block font-bold text-neutral-700 mb-1">Architectural Description *</label>
         <textarea name="description" rows="2" required
-                  class="w-full px-3.5 py-2 rounded-xl bg-alabaster border border-neutral-300">Newly built contemporary residence inspected and title-verified by Estate. Full transparent commitment displayed upfront.</textarea>
+                  class="w-full px-3.5 py-2 rounded-xl bg-alabaster border border-neutral-300">Newly built contemporary Abuja residence inspected and title-verified by Estate. Full transparent commitment displayed upfront.</textarea>
       </div>
 
       <div class="flex flex-col justify-between">
@@ -376,6 +399,29 @@
         </button>
       </div>
     </form>
+
+    <script>
+      function updateAgencyReadout() {
+        const propType = document.getElementById('propTypeSelect').value;
+        const baseVal = Number(document.getElementById('basePriceInput').value || 0);
+        const isLand = propType === 'Land';
+        const pct = isLand ? 5 : 7;
+        const fee = Math.round(baseVal * (pct / 100));
+        document.getElementById('agencyRateLabel').innerText = isLand
+          ? 'Agency Fee (5% Land Sale — Auto)'
+          : 'Agency Fee (7% House Cap — Auto)';
+        document.getElementById('agencyFeeReadout').value = '₦' + fee.toLocaleString() + ' (' + pct + '%)';
+      }
+
+      function toggleLandlordFormMode() {
+        const propType = document.getElementById('propTypeSelect').value;
+        const isLand = propType === 'Land';
+        document.getElementById('bedsBathsGroup').classList.toggle('hidden', isLand);
+        document.getElementById('houseChargesGroup').classList.toggle('hidden', isLand);
+        document.getElementById('landDocsGroup').classList.toggle('hidden', !isLand);
+        updateAgencyReadout();
+      }
+    </script>
   </div>
 </section>
 {% endblock %}
